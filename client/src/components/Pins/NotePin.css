@@ -1,0 +1,281 @@
+/* Note Pin - Yellow sticky note style */
+.note-pin {
+  position: relative;
+  background: 
+    repeating-linear-gradient(180deg, transparent, transparent 27px, rgba(161, 128, 0, 0.25) 27px, rgba(161, 128, 0, 0.25) 28px),
+    linear-gradient(135deg, #fef9c3 0%, #fef08a 100%);
+  border-radius: 2px;
+  padding: 1.25rem;
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+  transform: rotate(var(--pin-rotation, 0deg));
+  box-shadow:
+    0 3px 6px rgba(161, 128, 0, 0.15),
+    0 6px 12px rgba(0, 0, 0, 0.1),
+    0 10px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.note-pin:hover {
+  transform: translateY(-4px) rotate(calc(var(--pin-rotation, 0deg) + 0.5deg));
+  box-shadow:
+    0 6px 12px rgba(161, 128, 0, 0.2),
+    0 12px 24px rgba(0, 0, 0, 0.15),
+    0 16px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Completed state */
+.note-pin--completed {
+  opacity: 0.6;
+  transform: rotate(calc(var(--pin-rotation, 0deg) - 1deg));
+}
+
+.note-pin--completed:hover {
+  transform: translateY(-4px) rotate(calc(var(--pin-rotation, 0deg) - 0.5deg));
+}
+
+/* Delete pushpin (top right) */
+.note-pin__delete-pin {
+  position: absolute;
+  top: -6px;
+  right: 12px;
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(
+    circle at 30% 30%,
+    #d4a574 0%,
+    #a67c52 50%,
+    #8b5a2b 100%
+  );
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  z-index: 10;
+}
+
+.note-pin__delete-pin:hover {
+  transform: scale(1.2);
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Folded corner effect */
+.note-pin::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 24px 24px;
+  border-color: transparent transparent var(--board-bg, #3d2f1e) transparent;
+  border-radius: 0 0 2px 0;
+}
+
+.note-pin::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #fde047 0%, #eab308 100%);
+  border-radius: 0 0 2px 0;
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+  box-shadow: -2px -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Content area with checkbox */
+.note-pin__content {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+/* Custom checkbox */
+.note-pin__checkbox {
+  position: relative;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+}
+
+.note-pin__checkbox input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.note-pin__checkbox-visual {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid #a67c52;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.note-pin__checkbox input:hover + .note-pin__checkbox-visual {
+  border-color: #8b5a2b;
+}
+
+.note-pin__checkbox input:checked + .note-pin__checkbox-visual {
+  background: #22c55e;
+  border-color: #22c55e;
+}
+
+/* Checkmark */
+.note-pin__checkbox-visual::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.15s ease;
+}
+
+.note-pin__checkbox input:checked + .note-pin__checkbox-visual::after {
+  transform: rotate(45deg) scale(1);
+}
+
+/* Text content */
+.note-pin__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.note-pin__title {
+  font-family: var(--font-handwritten);
+  font-size: 1.3rem;
+  color: #713f12;
+  line-height: 1.3;
+  margin-bottom: 0.35rem;
+  word-wrap: break-word;
+}
+
+.note-pin--completed .note-pin__title {
+  text-decoration: line-through;
+  text-decoration-color: #92400e;
+}
+
+.note-pin__description {
+  font-size: 0.95rem;
+  color: #92400e;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+/* Per-item checklist */
+.note-pin__checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.note-pin__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+  padding: 0.15rem 0;
+  border-radius: 3px;
+  transition: background 0.15s ease;
+}
+
+.note-pin__item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.note-pin__item-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.note-pin__item-box {
+  position: relative;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 2px solid #a67c52;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+}
+
+.note-pin__item:hover .note-pin__item-box {
+  border-color: #8b5a2b;
+}
+
+.note-pin__item--checked .note-pin__item-box {
+  background: #22c55e;
+  border-color: #22c55e;
+}
+
+.note-pin__item-box::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.15s ease;
+}
+
+.note-pin__item--checked .note-pin__item-box::after {
+  transform: rotate(45deg) scale(1);
+}
+
+.note-pin__item-text {
+  font-size: 0.9rem;
+  color: #92400e;
+  line-height: 1.4;
+  transition: all 0.2s ease;
+}
+
+.note-pin__item--checked .note-pin__item-text {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.note-pin__item-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #713f12;
+  margin-top: 0.25rem;
+  margin-bottom: 0.1rem;
+}
+
+.note-pin__item-spacer {
+  height: 0.25rem;
+}
+
+/* Note indicator */
+.note-pin__indicator {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.75rem;
+  font-size: 0.9rem;
+  opacity: 0.6;
+}

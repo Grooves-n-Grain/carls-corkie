@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+server/dist/
+client/dist/
+
+# Environment
+.env
+.env.local
+
+# MCP configuration (may contain API keys)
+.mcp.json
+
+# Claude Code local settings
+.claude/
+
+# Superpowers local state
+.superpowers/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+data/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+tmp/
+
+# Git worktrees
+.worktrees/

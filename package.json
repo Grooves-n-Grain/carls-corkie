@@ -1,0 +1,32 @@
+{
+  "name": "corkboard-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "carl's visual dashboard - a warm, ADHD-friendly corkboard",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev -w server",
+    "dev:client": "npm run dev -w client",
+    "build": "npm run build -w server && npm run build -w client",
+    "test": "npm run test:run -w client && npm run test:run -w server",
+    "test:client": "npm run test -w client",
+    "test:server": "npm run test -w server",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:stop": "pm2 stop ecosystem.config.cjs",
+    "pm2:restart": "pm2 restart ecosystem.config.cjs",
+    "pm2:logs": "pm2 logs --lines 50"
+  },
+  "overrides": {
+    "path-to-regexp": "0.1.13",
+    "qs": "6.14.2",
+    "socket.io-parser": "4.2.6"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

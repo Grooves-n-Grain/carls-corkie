@@ -1,0 +1,343 @@
+/* Tracking Pin - Shipping label/cardboard style (UPS tan) */
+.tracking-pin {
+  position: relative;
+  background: 
+    repeating-linear-gradient(180deg, transparent, transparent 27px, rgba(13, 148, 136, 0.15) 27px, rgba(13, 148, 136, 0.15) 28px),
+    #ccfbf1 !important;
+  border-radius: 2px;
+  padding: 1.25rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+  transform: rotate(var(--pin-rotation, 0deg));
+  box-shadow:
+    0 3px 6px rgba(13, 148, 136, 0.15),
+    0 6px 12px rgba(0, 0, 0, 0.1),
+    0 10px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  border-left: 4px solid #0d9488;
+  overflow: visible;
+}
+
+.tracking-pin:hover {
+  transform: translateY(-4px) rotate(calc(var(--pin-rotation, 0deg) + 0.5deg));
+  box-shadow:
+    0 6px 12px rgba(20, 83, 88, 0.2),
+    0 12px 24px rgba(0, 0, 0, 0.15),
+    0 16px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Completed/Delivered state */
+.tracking-pin--completed {
+  opacity: 0.6;
+  transform: rotate(calc(var(--pin-rotation, 0deg) - 1deg));
+  border-left-color: #22c55e;
+}
+
+.tracking-pin--completed:hover {
+  transform: translateY(-4px) rotate(calc(var(--pin-rotation, 0deg) - 0.5deg));
+}
+
+/* Arriving today state - subtle glow */
+.tracking-pin--arriving {
+  box-shadow:
+    0 3px 6px rgba(13, 148, 136, 0.2),
+    0 6px 12px rgba(0, 0, 0, 0.1),
+    0 0 20px rgba(13, 148, 136, 0.4);
+  animation: tracking-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tracking-pulse {
+  0%, 100% {
+    box-shadow:
+      0 3px 6px rgba(13, 148, 136, 0.2),
+      0 6px 12px rgba(0, 0, 0, 0.1),
+      0 0 20px rgba(13, 148, 136, 0.4);
+  }
+  50% {
+    box-shadow:
+      0 3px 6px rgba(13, 148, 136, 0.2),
+      0 6px 12px rgba(0, 0, 0, 0.1),
+      0 0 30px rgba(13, 148, 136, 0.6);
+  }
+}
+
+/* Push pin at top */
+.tracking-pin::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(
+    circle at 30% 30%,
+    #5eead4 0%,
+    #0d9488 50%,
+    #0f766e 100%
+  );
+  border-radius: 50%;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Delete pushpin (top right) */
+.tracking-pin__delete-pin {
+  position: absolute;
+  top: -6px;
+  right: 12px;
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(
+    circle at 30% 30%,
+    #d4a574 0%,
+    #a67c52 50%,
+    #8b5a2b 100%
+  );
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  z-index: 10;
+}
+
+.tracking-pin__delete-pin:hover {
+  transform: scale(1.2);
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Content area */
+.tracking-pin__content {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+/* Custom checkbox */
+.tracking-pin__checkbox {
+  position: relative;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+}
+
+.tracking-pin__checkbox input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.tracking-pin__checkbox-visual {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid #0d9488;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.tracking-pin__checkbox input:hover + .tracking-pin__checkbox-visual {
+  border-color: #0f766e;
+}
+
+.tracking-pin__checkbox input:checked + .tracking-pin__checkbox-visual {
+  background: #22c55e;
+  border-color: #22c55e;
+}
+
+/* Checkmark */
+.tracking-pin__checkbox-visual::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.15s ease;
+}
+
+.tracking-pin__checkbox input:checked + .tracking-pin__checkbox-visual::after {
+  transform: rotate(45deg) scale(1);
+}
+
+/* Text content */
+.tracking-pin__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.tracking-pin__title {
+  font-family: var(--font-handwritten);
+  font-size: 1.3rem;
+  color: #134e4a;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+  word-wrap: break-word;
+}
+
+.tracking-pin--completed .tracking-pin__title {
+  text-decoration: line-through;
+  text-decoration-color: #0d9488;
+}
+
+/* Status badge */
+.tracking-pin__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #134e4a;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  margin-bottom: 0.5rem;
+}
+
+.tracking-pin__status-emoji {
+  font-size: 1rem;
+}
+
+.tracking-pin__status-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #5eead4;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Carrier info */
+.tracking-pin__carrier {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.tracking-pin__carrier-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f766e;
+}
+
+.tracking-pin__number {
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  font-size: 0.75rem;
+  color: #99f6e4;
+  background: #134e4a;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  word-break: break-all;
+}
+
+/* Location */
+.tracking-pin__location {
+  font-size: 0.9rem;
+  color: #115e59;
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+}
+
+/* ETA */
+.tracking-pin__eta {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.tracking-pin__eta-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.tracking-pin__eta-date {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0d9488;
+}
+
+/* Description */
+.tracking-pin__description {
+  font-size: 0.9rem;
+  color: #1a5c54;
+  line-height: 1.4;
+  margin-top: 0.5rem;
+  white-space: pre-line;
+}
+
+/* Track link button */
+.tracking-pin__track-link {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 2rem;
+  font-size: 0.75rem;
+  color: #0f766e;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 3px;
+  transition: all 0.15s ease;
+}
+
+.tracking-pin__track-link:hover {
+  background: rgba(13, 148, 136, 0.15);
+  color: #134e4a;
+}
+
+/* Package icon */
+.tracking-pin__icon {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  color: #148b44;
+  opacity: 0.5;
+}
+
+.tracking-pin__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Arriving today badge */
+.tracking-pin__arriving-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  font-size: 1rem;
+  animation: badge-bounce 1s ease-in-out infinite;
+}
+
+@keyframes badge-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Shipping label dashed border effect at bottom */
+.tracking-pin::after {
+  content: '';
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.75rem;
+  right: 0.75rem;
+  height: 0;
+  border-bottom: 2px dashed rgba(139, 90, 43, 0.25);
+}

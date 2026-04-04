@@ -1,0 +1,127 @@
+/* Form Field Container */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.form-field:last-of-type {
+  margin-bottom: 0;
+}
+
+/* Labels */
+.form-field__label {
+  font-family: var(--font-handwritten, 'Patrick Hand', cursive);
+  font-size: 0.95rem;
+  color: #c4b8a8;
+}
+
+.form-field__required {
+  color: #e57373;
+  margin-left: 0.25rem;
+}
+
+/* Text Inputs */
+.form-field__input,
+.form-field__textarea,
+.form-field__select {
+  background: #1a1510;
+  border: 1px solid #4a3f2f;
+  border-radius: 4px;
+  color: #e8dcc8;
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.6rem 0.75rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.form-field__input:focus,
+.form-field__textarea:focus,
+.form-field__select:focus {
+  outline: none;
+  border-color: #6b5d4a;
+  box-shadow: 0 0 0 2px rgba(107, 93, 74, 0.3);
+}
+
+.form-field__input::placeholder,
+.form-field__textarea::placeholder {
+  color: #6b5d4a;
+}
+
+/* Textarea */
+.form-field__textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Select */
+.form-field__select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a89880' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+}
+
+.form-field__select option {
+  background: #1a1510;
+  color: #e8dcc8;
+}
+
+/* Number Input */
+.form-field__input--number {
+  width: 100px;
+}
+
+/* DateTime Input */
+.form-field__input--datetime {
+  color-scheme: dark;
+}
+
+/* Submit Button */
+.form-field__submit {
+  background: linear-gradient(135deg, #5a4a3a 0%, #4a3f2f 100%);
+  border: 1px solid #6b5d4a;
+  border-radius: 6px;
+  color: #e8dcc8;
+  cursor: pointer;
+  font-family: var(--font-handwritten, 'Patrick Hand', cursive);
+  font-size: 1.1rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.form-field__submit:hover:not(:disabled) {
+  background: linear-gradient(135deg, #6b5d4a 0%, #5a4a3a 100%);
+  border-color: #8a7a68;
+}
+
+.form-field__submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.form-field__submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Inline fields (for numbers side by side) */
+.form-field--inline {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.form-field--inline .form-field__label {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.form-field--inline .form-field__input {
+  flex: 1;
+}

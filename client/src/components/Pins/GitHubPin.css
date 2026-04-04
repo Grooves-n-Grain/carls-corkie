@@ -1,0 +1,248 @@
+/* GitHub Pin - Terminal window style */
+.github-pin {
+  position: relative;
+  background: 
+    repeating-linear-gradient(180deg, transparent, transparent 27px, rgba(100, 140, 200, 0.08) 27px, rgba(100, 140, 200, 0.08) 28px),
+    #0d1117;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-width: 320px;
+  max-width: 420px;
+}
+
+.github-pin:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.5),
+    0 16px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.github-pin--completed {
+  opacity: 0.6;
+}
+
+/* Title bar with traffic lights */
+.github-pin__titlebar {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(180deg, #1c2128 0%, #161b22 100%);
+  border-bottom: 1px solid #30363d;
+}
+
+.github-pin__traffic-lights {
+  display: flex;
+  gap: 6px;
+}
+
+.github-pin__light {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  box-shadow: inset 0 -1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.github-pin__light--red {
+  background: radial-gradient(circle at 30% 30%, #ff6b6b, #ff5f56);
+}
+
+.github-pin__light--yellow {
+  background: radial-gradient(circle at 30% 30%, #ffda6b, #ffbd2e);
+}
+
+.github-pin__light--green {
+  background: radial-gradient(circle at 30% 30%, #6bffb8, #27c93f);
+}
+
+.github-pin__path {
+  flex: 1;
+  text-align: center;
+  color: #8b949e;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.85rem;
+}
+
+.github-pin__stats {
+  display: flex;
+  gap: 0.75rem;
+  color: #8b949e;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.8rem;
+}
+
+.github-pin__stat {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Terminal content area */
+.github-pin__terminal {
+  position: relative;
+  padding: 1.25rem;
+  font-family: 'SF Mono', 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+/* Delete button */
+.github-pin__delete {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  color: #484f58;
+  font-size: 1.25rem;
+  line-height: 1;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.github-pin:hover .github-pin__delete {
+  opacity: 1;
+}
+
+.github-pin__delete:hover {
+  background: rgba(248, 81, 73, 0.15);
+  color: #f85149;
+}
+
+/* Command prompt line */
+.github-pin__command {
+  color: #8b949e;
+  font-size: 0.9rem;
+  margin-bottom: 0.75rem;
+}
+
+.github-pin__prompt {
+  color: #3fb950;
+  margin-right: 0.5rem;
+}
+
+/* Project name */
+.github-pin__name {
+  color: #e6edf3;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  margin: 0 0 0.75rem 0;
+}
+
+/* Description with green left border */
+.github-pin__description {
+  color: #c9d1d9;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  margin: 0 0 1rem 0;
+  padding: 0.75rem 1rem;
+  border-left: 3px solid #3fb950;
+  background: rgba(63, 185, 80, 0.08);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Footer */
+.github-pin__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #21262d;
+}
+
+.github-pin__link {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #3fb950;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.15s ease;
+}
+
+.github-pin__link:hover {
+  color: #56d364;
+}
+
+.github-pin__link--disabled {
+  color: #484f58;
+  cursor: default;
+}
+
+.github-pin__icon {
+  width: 16px;
+  height: 16px;
+}
+
+.github-pin__date {
+  color: #484f58;
+  font-size: 0.85rem;
+}
+
+/* Complete checkbox (subtle, bottom right) */
+.github-pin__complete {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  width: 18px;
+  height: 18px;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+
+.github-pin:hover .github-pin__complete {
+  opacity: 1;
+}
+
+.github-pin__complete input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.github-pin__complete-visual {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  border: 2px solid #30363d;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.github-pin__complete input:hover + .github-pin__complete-visual {
+  border-color: #3fb950;
+}
+
+.github-pin__complete input:checked + .github-pin__complete-visual {
+  background: #3fb950;
+  border-color: #3fb950;
+}
+
+.github-pin__complete-visual::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid #0d1117;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.15s ease;
+}
+
+.github-pin__complete input:checked + .github-pin__complete-visual::after {
+  transform: rotate(45deg) scale(1);
+}

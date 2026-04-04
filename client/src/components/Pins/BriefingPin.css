@@ -1,0 +1,248 @@
+/* Briefing Pin - Large paper document style */
+/* Span two columns in the grid */
+.briefing-pin {
+  grid-column: span 2;
+  position: relative;
+  background: linear-gradient(180deg, #fff1e6 0%, #fed7aa 50%, #fdba74 100%);
+  border-radius: 4px;
+  padding: 1.5rem;
+  padding-top: 2rem;
+  min-width: 100%;
+  max-width: 100%;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.1),
+    0 8px 16px rgba(0, 0, 0, 0.1),
+    0 16px 32px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset -2px 0 8px rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.briefing-pin:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.12),
+    0 12px 24px rgba(0, 0, 0, 0.12),
+    0 24px 48px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset -2px 0 8px rgba(0, 0, 0, 0.02);
+}
+
+/* Paper texture effect - more visible */
+.briefing-pin::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.07;
+  pointer-events: none;
+  border-radius: 4px;
+}
+
+/* Lined paper effect */
+.briefing-pin::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 27px,
+    rgba(180, 200, 220, 0.45) 27px,
+    rgba(180, 200, 220, 0.45) 28px
+  );
+  pointer-events: none;
+  border-radius: 4px;
+}
+
+/* Coffee ring stain - bottom right corner */
+.briefing-pin__stain {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    rgba(139, 90, 43, 0.04) 45%,
+    rgba(139, 90, 43, 0.08) 50%,
+    rgba(139, 90, 43, 0.04) 55%,
+    transparent 60%
+  );
+  pointer-events: none;
+  transform: rotate(-15deg);
+}
+
+/* Dog-ear folded corner */
+.briefing-pin__fold {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 32px 32px 0;
+  border-color: transparent #f5e6d0 transparent transparent;
+  filter: drop-shadow(-1px 1px 1px rgba(0, 0, 0, 0.08));
+}
+
+.briefing-pin__fold::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -32px;
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(
+    135deg,
+    #fff1e6 0%,
+    #fed7aa 50%,
+    #fdba74 100%
+  );
+  clip-path: polygon(0 0, 100% 0, 100% 100%);
+}
+
+/* Dismiss pushpin */
+.briefing-pin__dismiss {
+  position: absolute;
+  top: -6px;
+  right: 20px;
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(
+    circle at 30% 30%,
+    #ef4444 0%,
+    #dc2626 50%,
+    #b91c1c 100%
+  );
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  z-index: 10;
+}
+
+.briefing-pin__dismiss:hover {
+  transform: scale(1.2);
+  box-shadow:
+    0 3px 6px rgba(0, 0, 0, 0.4),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Header */
+.briefing-pin__header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e5e5e5;
+}
+
+.briefing-pin__icon {
+  font-size: 1.5rem;
+}
+
+.briefing-pin__title {
+  font-family: var(--font-handwritten);
+  font-size: 1.4rem;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Content area */
+.briefing-pin__content {
+  position: relative;
+  z-index: 1;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: #333;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.briefing-pin__content h3 {
+  font-size: 1rem;
+  color: #1a1a1a;
+  margin: 1rem 0 0.5rem 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+}
+
+.briefing-pin__content h3:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.briefing-pin__content h4 {
+  font-size: 0.9rem;
+  color: #444;
+  margin: 0.75rem 0 0.25rem 0;
+}
+
+.briefing-pin__content ul {
+  margin: 0.5rem 0;
+  padding-left: 1.25rem;
+}
+
+.briefing-pin__content li {
+  margin-bottom: 0.25rem;
+}
+
+.briefing-pin__content strong {
+  color: #1a1a1a;
+}
+
+.briefing-pin__content hr {
+  border: none;
+  border-top: 1px dashed #ccc;
+  margin: 0.75rem 0;
+}
+
+.briefing-pin__content p {
+  margin: 0.5rem 0;
+}
+
+/* Footer */
+.briefing-pin__footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eee;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+/* Scrollbar styling */
+.briefing-pin__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.briefing-pin__content::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 3px;
+}
+
+.briefing-pin__content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.briefing-pin__content::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}

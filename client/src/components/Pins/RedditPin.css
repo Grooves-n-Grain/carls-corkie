@@ -1,0 +1,253 @@
+/* Reddit Pin - Reddit post card style */
+.reddit-pin {
+  position: relative;
+  background:
+    repeating-linear-gradient(180deg, transparent, transparent 27px, rgba(255, 69, 0, 0.06) 27px, rgba(255, 69, 0, 0.06) 28px),
+    linear-gradient(135deg, #faf9f6 0%, #f5f0eb 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-width: 320px;
+  max-width: 420px;
+}
+
+/* Push pin */
+.reddit-pin::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ff7043 0%, #FF4500 50%, #cc3700 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.reddit-pin:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.2),
+    0 16px 40px rgba(0, 0, 0, 0.15);
+}
+
+.reddit-pin--completed {
+  opacity: 0.6;
+}
+
+/* Body layout: vote strip + content side by side */
+.reddit-pin__body {
+  display: flex;
+}
+
+/* Left vote strip */
+.reddit-pin__vote-strip {
+  width: 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0;
+  gap: 4px;
+  background: #f0ede8;
+  border-right: 1px solid rgba(255, 69, 0, 0.15);
+}
+
+/* Vote arrows */
+.reddit-pin__arrow {
+  flex-shrink: 0;
+}
+
+.reddit-pin__arrow--up {
+  opacity: 0.9;
+}
+
+.reddit-pin__arrow--down {
+  opacity: 0.5;
+}
+
+/* Score dot */
+.reddit-pin__score {
+  color: #787c7e;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* Content area */
+.reddit-pin__content-area {
+  flex: 1;
+  padding: 1rem 1.25rem;
+  min-width: 0;
+}
+
+/* Delete button */
+.reddit-pin__delete {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  color: #a8a29e;
+  font-size: 1.25rem;
+  line-height: 1;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.15s ease;
+  z-index: 5;
+}
+
+.reddit-pin:hover .reddit-pin__delete {
+  opacity: 1;
+}
+
+.reddit-pin__delete:hover {
+  background: rgba(255, 69, 0, 0.12);
+  color: #FF4500;
+}
+
+/* Subreddit row with Snoo icon */
+.reddit-pin__subreddit-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 69, 0, 0.12);
+}
+
+.reddit-pin__snoo {
+  flex-shrink: 0;
+}
+
+.reddit-pin__subreddit {
+  color: #FF4500;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* Post title */
+.reddit-pin__title {
+  color: #1a1a1b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0 0 0.5rem 0;
+}
+
+/* Post text content — clamped to 8 lines */
+.reddit-pin__text {
+  color: #4a4a4b;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 0 0 0.75rem 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Footer */
+.reddit-pin__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 69, 0, 0.12);
+}
+
+.reddit-pin__link {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #FF4500;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.15s ease;
+}
+
+.reddit-pin__link:hover {
+  color: #ff6833;
+}
+
+.reddit-pin__link--disabled {
+  color: #a8a29e;
+  cursor: default;
+}
+
+.reddit-pin__link--disabled:hover {
+  color: #a8a29e;
+}
+
+.reddit-pin__date {
+  color: #787c7e;
+  font-size: 0.85rem;
+}
+
+/* Complete checkbox (bottom of vote strip) */
+.reddit-pin__complete {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+
+.reddit-pin:hover .reddit-pin__complete {
+  opacity: 1;
+}
+
+.reddit-pin__complete input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.reddit-pin__complete-visual {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  border: 2px solid #d0c8be;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.reddit-pin__complete input:hover + .reddit-pin__complete-visual {
+  border-color: #FF4500;
+}
+
+.reddit-pin__complete input:checked + .reddit-pin__complete-visual {
+  background: #FF4500;
+  border-color: #FF4500;
+}
+
+.reddit-pin__complete-visual::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid #faf9f6;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.15s ease;
+}
+
+.reddit-pin__complete input:checked + .reddit-pin__complete-visual::after {
+  transform: rotate(45deg) scale(1);
+}

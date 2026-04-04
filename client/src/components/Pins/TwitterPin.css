@@ -1,0 +1,209 @@
+/* Twitter Pin - Classic dark mode tweet card pinned to the board */
+.twitter-pin {
+  position: relative;
+  background: linear-gradient(135deg, #15202b 0%, #1a2836 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-width: 320px;
+  max-width: 420px;
+  padding: 1.5rem 1.25rem 1.25rem;
+}
+
+
+/* Twitter blue push pin */
+.twitter-pin::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #4db8f5 0%, #1da1f2 50%, #1a8cd8 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.twitter-pin:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.4),
+    0 16px 40px rgba(29, 161, 242, 0.15);
+}
+
+.twitter-pin--completed {
+  opacity: 0.6;
+}
+
+/* All direct children above the lined overlay */
+.twitter-pin__delete,
+.twitter-pin__author,
+.twitter-pin__text,
+.twitter-pin__footer,
+.twitter-pin__complete {
+  position: relative;
+  z-index: 1;
+}
+
+/* Delete button */
+.twitter-pin__delete {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  color: rgba(231, 233, 234, 0.4);
+  font-size: 1.25rem;
+  line-height: 1;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all 0.15s ease;
+}
+
+.twitter-pin:hover .twitter-pin__delete {
+  opacity: 1;
+}
+
+.twitter-pin__delete:hover {
+  background: rgba(29, 161, 242, 0.1);
+  color: #e7e9ea;
+}
+
+/* Author header */
+.twitter-pin__author {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Twitter bird icon */
+.twitter-pin__bird {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Author name */
+.twitter-pin__name {
+  color: #e7e9ea;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Tweet text */
+.twitter-pin__text {
+  color: #e7e9ea;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  margin: 0 0 1rem 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Footer */
+.twitter-pin__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.twitter-pin__link {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #1da1f2;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.15s ease;
+}
+
+.twitter-pin__link:hover {
+  color: #1a8cd8;
+}
+
+.twitter-pin__link--disabled {
+  color: rgba(231, 233, 234, 0.3);
+  cursor: default;
+}
+
+.twitter-pin__link-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.twitter-pin__date {
+  color: #71767b;
+  font-size: 0.85rem;
+}
+
+/* Checkbox - subtle, inline with author */
+.twitter-pin__complete {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+
+.twitter-pin:hover .twitter-pin__complete {
+  opacity: 1;
+}
+
+.twitter-pin__complete input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.twitter-pin__complete-visual {
+  position: absolute;
+  inset: 0;
+  background: transparent;
+  border: 2px solid rgba(231, 233, 234, 0.3);
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.twitter-pin__complete input:hover + .twitter-pin__complete-visual {
+  border-color: #1da1f2;
+}
+
+.twitter-pin__complete input:checked + .twitter-pin__complete-visual {
+  background: #1da1f2;
+  border-color: #1da1f2;
+}
+
+.twitter-pin__complete-visual::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid #15202b;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg) scale(0);
+  transition: transform 0.15s ease;
+}
+
+.twitter-pin__complete input:checked + .twitter-pin__complete-visual::after {
+  transform: rotate(45deg) scale(1);
+}

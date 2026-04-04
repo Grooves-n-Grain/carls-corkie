@@ -1,0 +1,43 @@
+.pin-type-selector {
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(74, 63, 47, 0.5);
+}
+
+.pin-type-selector__label {
+  display: block;
+  font-family: var(--font-handwritten, 'Patrick Hand', cursive);
+  font-size: 0.95rem;
+  color: #c4b8a8;
+  margin-bottom: 0.4rem;
+}
+
+.pin-type-selector__select {
+  width: 100%;
+  background: #1a1510;
+  border: 1px solid #4a3f2f;
+  border-radius: 4px;
+  color: #e8dcc8;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.7rem 0.75rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a89880' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pin-type-selector__select:focus {
+  outline: none;
+  border-color: #6b5d4a;
+  box-shadow: 0 0 0 2px rgba(107, 93, 74, 0.3);
+}
+
+.pin-type-selector__select option {
+  background: #1a1510;
+  color: #e8dcc8;
+  padding: 0.5rem;
+}

@@ -1,0 +1,111 @@
+/* Create Pin Panel - Slide out from right */
+.create-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 360px;
+  max-width: 95vw;
+  height: 100vh;
+  background: #2a2218;
+  border-left: 3px solid #4a3f2f;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.4);
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.create-panel--open {
+  transform: translateX(0);
+}
+
+/* Backdrop */
+.create-panel__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  z-index: 999;
+}
+
+.create-panel__backdrop--open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Header */
+.create-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #4a3f2f;
+  background: #352b20;
+  flex-shrink: 0;
+}
+
+.create-panel__header h2 {
+  font-family: var(--font-handwritten, 'Patrick Hand', cursive);
+  font-size: 1.4rem;
+  color: #e8dcc8;
+  margin: 0;
+}
+
+.create-panel__close {
+  background: none;
+  border: none;
+  color: #a89880;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  line-height: 1;
+  border-radius: 4px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.create-panel__close:hover {
+  color: #e8dcc8;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Content */
+.create-panel__content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem;
+}
+
+/* Success message */
+.create-panel__success {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  border-radius: 6px;
+  color: #4ade80;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 480px) {
+  .create-panel {
+    width: 100vw;
+    max-width: 100vw;
+  }
+}

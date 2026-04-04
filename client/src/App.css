@@ -1,0 +1,74 @@
+/* Theme variables - Warm Cork (Dark) */
+:root {
+  /* Board colors */
+  --board-bg: #1a1512;
+  --board-texture: #2a211a;
+  --board-border: #3d3028;
+
+  /* Pin colors */
+  --pin-bg: #dcfce7;
+  --pin-bg-hover: #f0fdf4;
+  --pin-shadow: rgba(0, 0, 0, 0.4);
+  --pin-border: #d4c9b8;
+
+  /* Push pin accent */
+  --pushpin-color: #b87333;
+  --pushpin-highlight: #d4955a;
+  --pushpin-shadow: #8b5a2b;
+
+  /* Text on pins (dark text on light pin) */
+  --pin-text-primary: #2d2418;
+  --pin-text-secondary: #5c4d3d;
+
+  /* Text on board (light text on dark board) */
+  --board-text-primary: #f5f0e6;
+  --board-text-secondary: #a89b8c;
+
+  /* Status colors (soft, not alarming) */
+  --status-active: #4a7c59;
+  --status-completed: #6b8e6b;
+  --status-urgent-soft: #d4a574;
+  --status-urgent-medium: #c97b4b;
+  --status-urgent-high: #b54a32;
+
+  /* Checkbox */
+  --checkbox-bg: #ffffff;
+  --checkbox-border: #8b7355;
+  --checkbox-checked: #4a7c59;
+
+  /* Fonts */
+  --font-handwritten: 'Patrick Hand', cursive;
+  --font-ui: 'Inter', system-ui, sans-serif;
+}
+
+/* Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-ui);
+  background: var(--board-bg);
+  color: var(--board-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Utility classes */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
