@@ -38,7 +38,7 @@ TYPES:
 
 SPECIAL COMMANDS:
     corkboard add-email <from> <subject> [preview] [email_id]
-    corkboard add-github <repo> <description> [stars] [forks]
+    corkboard add-github <owner/repo> [description] [stars] [forks]
     corkboard add-idea <title> [verdict] [summary] [scores_json] [competitors] [effort]
     corkboard add-tracking <number> <carrier> [status] [eta] [url]
     corkboard add-article <title> <url> <source> <tldr> [bullets_json] [tags_json]
@@ -207,10 +207,13 @@ case "$1" in
             --arg title "$TITLE" \
             --arg verdict "$VERDICT" \
             --arg summary "$SUMMARY" \
-            --argjson scores "${SCORES_JSON:-null}" \
             --argjson competitors "$COMPETITORS" \
             --arg effort "$EFFORT" \
-            '{type: $type, title: $title, ideaVerdict: $verdict, ideaResearchSummary: $summary, ideaScores: $scores, ideaCompetitors: $competitors, ideaEffortEstimate: $effort}')
+            '{type: $type, title: $title, ideaVerdict: $verdict, ideaResearchSummary: $summary, ideaCompetitors: $competitors, ideaEffortEstimate: $effort}')
+
+        if [[ -n "$SCORES_JSON" ]]; then
+            JSON=$(echo "$JSON" | jq --argjson scores "$SCORES_JSON" '. + {ideaScores: $scores}')
+        fi
 
         RESULT=$(curl -s -X POST "$API_URL" \
             -H "Content-Type: application/json" \
@@ -267,9 +270,14 @@ case "$1" in
             --arg trackingNumber "$NUMBER" \
             --arg trackingCarrier "$CARRIER" \
             --arg trackingStatus "$STATUS" \
-            --arg trackingEta "$ETA" \
-            --arg trackingUrl "$URL" \
-            '{type: $type, title: $title, trackingNumber: $trackingNumber, trackingCarrier: $trackingCarrier, trackingStatus: $trackingStatus, trackingEta: $trackingEta, trackingUrl: $trackingUrl}')
+            '{type: $type, title: $title, trackingNumber: $trackingNumber, trackingCarrier: $trackingCarrier, trackingStatus: $trackingStatus}')
+
+        if [[ -n "$ETA" ]]; then
+            JSON=$(echo "$JSON" | jq --arg eta "$ETA" '. + {trackingEta: $eta}')
+        fi
+        if [[ -n "$URL" ]]; then
+            JSON=$(echo "$JSON" | jq --arg url "$URL" '. + {trackingUrl: $url}')
+        fi
 
         RESULT=$(curl -s -X POST "$API_URL" \
             -H "Content-Type: application/json" \
