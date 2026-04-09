@@ -19,7 +19,8 @@ type PinType =
   | 'tracking'
   | 'article'
   | 'twitter'
-  | 'reddit';
+  | 'reddit'
+  | 'youtube';
 
 type PinStatus = 'active' | 'completed' | 'snoozed' | 'dismissed';
 
@@ -61,6 +62,7 @@ Notes:
 | `article` | Article summaries | `articleData` |
 | `twitter` | X/Twitter previews | `url`, `content` |
 | `reddit` | Reddit previews | `url`, `content` |
+| `youtube` | YouTube video cards | `url`, `youtubeData` |
 
 ## Specialized Shapes
 
@@ -133,6 +135,27 @@ articleData?: {
 };
 ```
 
+### `youtube`
+
+```typescript
+youtubeData?: {
+  videoId: string;        // required — 11-char YouTube video ID
+  thumbnailUrl: string;   // required — absolute http(s) URL
+  channelTitle?: string;
+  description?: string;
+  publishedAt?: string;
+  duration?: string;      // e.g. "12:44" or "1:02:30"
+  embedUrl?: string;      // absolute http(s) URL
+  sourceUrl?: string;     // absolute http(s) URL
+};
+```
+
+Supported URL formats for the `url` field:
+- `https://www.youtube.com/watch?v=<id>`
+- `https://youtu.be/<id>`
+- `https://www.youtube.com/shorts/<id>`
+- `https://www.youtube.com/live/<id>`
+
 ## Examples
 
 Task:
@@ -184,6 +207,25 @@ curl -X POST "$CORKBOARD_API/api/pins" \
       "tldr":"Practical notes on shipping local-first tools.",
       "bullets":["Sync matters less than resilience","Offline UX still wins"],
       "tags":["product","frontend"]
+    }
+  }'
+```
+
+YouTube:
+```bash
+curl -X POST "$CORKBOARD_API/api/pins" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type":"youtube",
+    "title":"Demo video",
+    "url":"https://www.youtube.com/watch?v=abc123xyz00",
+    "youtubeData":{
+      "videoId":"abc123xyz00",
+      "thumbnailUrl":"https://i.ytimg.com/vi/abc123xyz00/hqdefault.jpg",
+      "channelTitle":"Demo Channel",
+      "duration":"12:44",
+      "embedUrl":"https://www.youtube.com/embed/abc123xyz00",
+      "sourceUrl":"https://www.youtube.com/watch?v=abc123xyz00"
     }
   }'
 ```

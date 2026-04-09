@@ -38,7 +38,8 @@ const PIN_TABLE_SQL = `
     tracking_eta TEXT,
     tracking_last_update TEXT,
     tracking_url TEXT,
-    article_data TEXT
+    article_data TEXT,
+    youtube_data TEXT
   );
 `;
 
@@ -63,6 +64,7 @@ const PIN_OPTIONAL_COLUMNS = [
   ['tracking_last_update', 'TEXT'],
   ['tracking_url', 'TEXT'],
   ['article_data', 'TEXT'],
+  ['youtube_data', 'TEXT'],
 ] as const;
 
 const PIN_ALL_COLUMNS = [
@@ -96,6 +98,7 @@ const PIN_ALL_COLUMNS = [
   'tracking_last_update',
   'tracking_url',
   'article_data',
+  'youtube_data',
 ] as const;
 
 function resolveDbPath(): string {

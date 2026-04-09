@@ -136,11 +136,20 @@ export const PIN_TYPE_CONFIG: PinTypeConfig[] = [
   {
     value: 'reddit',
     label: 'Reddit',
-    emoji: '🔶',
+    emoji: '👽',
     fields: [
       { name: 'title', label: 'Subreddit', type: 'text', required: true, placeholder: 'r/SubredditName' },
       { name: 'content', label: 'Content', type: 'textarea', placeholder: 'Post content...' },
       { name: 'url', label: 'URL', type: 'url', placeholder: 'https://reddit.com/...' },
+    ],
+  },
+  {
+    value: 'youtube',
+    label: 'YouTube',
+    emoji: '🔴',
+    fields: [
+      { name: 'url', label: 'YouTube URL', type: 'url', required: true, placeholder: 'https://youtube.com/watch?v=...' },
+      { name: 'title', label: 'Title', type: 'text', placeholder: 'Optional — auto-detected' },
     ],
   },
 ];

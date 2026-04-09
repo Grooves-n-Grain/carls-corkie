@@ -15,6 +15,7 @@ import { TrackingPin } from '../Pins/TrackingPin';
 import { ArticlePin } from '../Pins/ArticlePin';
 import { TwitterPin } from '../Pins/TwitterPin';
 import { RedditPin } from '../Pins/RedditPin';
+import { YouTubePin } from '../Pins/YouTubePin';
 import { HistoryPanel } from '../HistoryPanel/HistoryPanel';
 import { CreatePinPanel } from '../CreatePinPanel/CreatePinPanel';
 import { ProjectPipeline } from '../Projects/ProjectPipeline';
@@ -199,6 +200,15 @@ export function Board({ pins, isConnected, connectionStatus, transport, onToggle
       case 'reddit':
         return (
           <RedditPin
+            key={pin.id}
+            pin={pin}
+            onToggleComplete={() => onToggleComplete(pin.id, pin.status)}
+            onDelete={() => onDelete(pin.id)}
+          />
+        );
+      case 'youtube':
+        return (
+          <YouTubePin
             key={pin.id}
             pin={pin}
             onToggleComplete={() => onToggleComplete(pin.id, pin.status)}

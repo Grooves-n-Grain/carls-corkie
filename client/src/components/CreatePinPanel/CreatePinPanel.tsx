@@ -9,6 +9,7 @@ import { AlertForm } from './forms/AlertForm';
 import { EmailForm } from './forms/EmailForm';
 import { BriefingForm } from './forms/BriefingForm';
 import { GitHubForm } from './forms/GitHubForm';
+import { YouTubeForm } from './forms/YouTubeForm';
 import './CreatePinPanel.css';
 
 interface CreatePinPanelProps {
@@ -46,6 +47,8 @@ export function CreatePinPanel({ isOpen, onClose, apiUrl }: CreatePinPanelProps)
         return <BriefingForm {...formProps} />;
       case 'github':
         return <GitHubForm {...formProps} />;
+      case 'youtube':
+        return <YouTubeForm {...formProps} />;
       default:
         return <TaskForm {...formProps} />;
     }

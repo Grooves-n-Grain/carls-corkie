@@ -31,12 +31,13 @@ Important request fields:
 - Valid `status` values: `active | completed | snoozed | dismissed`
 - Valid `priority` values: `1 | 2 | 3`; create defaults to `2`
 - URL fields must be absolute `http(s)` URLs
-- Specialized optional fields: `emailFrom`, `emailDate`, `emailId`, `repo`, `stars`, `forks`, `ideaVerdict`, `ideaScores`, `trackingNumber`, `trackingCarrier`, `trackingStatus`, `trackingEta`, `trackingUrl`, `articleData`
+- Specialized optional fields: `emailFrom`, `emailDate`, `emailId`, `repo`, `stars`, `forks`, `ideaVerdict`, `ideaScores`, `trackingNumber`, `trackingCarrier`, `trackingStatus`, `trackingEta`, `trackingUrl`, `articleData`, `youtubeData`
 
 Validation notes:
 - Bad enums, invalid priorities, malformed nested objects, and invalid `http(s)` URL fields return `400`.
 - `articleData` must include `url`, `source`, `tldr`, and a `bullets` string array.
 - `ideaScores.*` values must be finite numbers between `0` and `10`.
+- `youtubeData` must include `videoId` (non-empty string) and `thumbnailUrl` (absolute http(s) URL). Optional: `channelTitle`, `description`, `publishedAt`, `duration`, `embedUrl`, `sourceUrl`.
 
 ## Projects
 

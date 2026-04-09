@@ -1,6 +1,6 @@
 ---
 name: corkboard_dashboard
-description: Post and manage real-time corkboard pins, lamp cues, deleted-history recovery, and multi-track project pipeline work for the Carl's Corkie dashboard. Use when you need to surface actionable tasks, alerts, opportunities, links, briefings, package tracking, article summaries, or cellar ideas on the board.
+description: Post and manage real-time corkboard pins, lamp cues, deleted-history recovery, and multi-track project pipeline work for the Carl's Corkie dashboard. Use when you need to surface actionable tasks, alerts, opportunities, links, briefings, package tracking, article summaries, YouTube videos, or cellar ideas on the board.
 homepage: https://github.com/zheroz00/carls-corkie
 metadata: {"openclaw":{"emoji":"📌"}}
 ---
@@ -69,6 +69,7 @@ bash {baseDir}/scripts/corkboard.sh add-opportunity <title> [content] [priority]
 bash {baseDir}/scripts/corkboard.sh add-briefing <title> <content>
 bash {baseDir}/scripts/corkboard.sh add-twitter <title> <content> [url]
 bash {baseDir}/scripts/corkboard.sh add-reddit <title> <content> [url]
+bash {baseDir}/scripts/corkboard.sh add-youtube <youtube-url>
 curl "$CORKBOARD_API/api/pins/history/deleted"
 curl -X POST "$CORKBOARD_API/api/pins/<pin-id>/restore"
 curl -X POST "$CORKBOARD_API/api/projects/<project-id>/cellar"

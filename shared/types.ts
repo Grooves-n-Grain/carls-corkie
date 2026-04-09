@@ -1,6 +1,6 @@
 // Pin types for the corkboard dashboard
 
-export type PinType = 'task' | 'note' | 'link' | 'event' | 'alert' | 'email' | 'opportunity' | 'briefing' | 'github' | 'idea' | 'tracking' | 'article' | 'twitter' | 'reddit';
+export type PinType = 'task' | 'note' | 'link' | 'event' | 'alert' | 'email' | 'opportunity' | 'briefing' | 'github' | 'idea' | 'tracking' | 'article' | 'twitter' | 'reddit' | 'youtube';
 
 export type PinStatus = 'active' | 'completed' | 'snoozed' | 'dismissed';
 
@@ -11,6 +11,17 @@ export interface ArticleData {
   tldr: string;
   bullets: string[];
   tags?: string[];
+}
+
+export interface YouTubeData {
+  videoId: string;
+  channelTitle?: string;
+  description?: string;
+  thumbnailUrl: string;
+  publishedAt?: string;
+  duration?: string;
+  embedUrl?: string;
+  sourceUrl?: string;
 }
 
 export interface Pin {
@@ -49,6 +60,7 @@ export interface Pin {
   trackingLastUpdate?: string;
   trackingUrl?: string;
   articleData?: ArticleData;
+  youtubeData?: YouTubeData;
 }
 
 export interface CreatePinRequest {
@@ -83,6 +95,7 @@ export interface CreatePinRequest {
   trackingLastUpdate?: string;
   trackingUrl?: string;
   articleData?: ArticleData;
+  youtubeData?: YouTubeData;
 }
 
 export interface UpdatePinRequest {
@@ -117,6 +130,7 @@ export interface UpdatePinRequest {
   trackingLastUpdate?: string;
   trackingUrl?: string;
   articleData?: ArticleData;
+  youtubeData?: YouTubeData;
 }
 
 export interface ServerToClientEvents {
