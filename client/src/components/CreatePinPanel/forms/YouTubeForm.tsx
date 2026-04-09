@@ -1,5 +1,5 @@
 import { useState, FormEvent } from 'react';
-import { TextInput, UrlInput, SubmitButton } from './FormFields';
+import { TextInput, TextArea, UrlInput, SubmitButton } from './FormFields';
 
 interface YouTubeFormProps {
   apiUrl: string;
@@ -21,6 +21,7 @@ function extractVideoId(url: string): string | null {
 export function YouTubeForm({ apiUrl, onSuccess }: YouTubeFormProps) {
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -29,6 +30,7 @@ export function YouTubeForm({ apiUrl, onSuccess }: YouTubeFormProps) {
   const resetForm = () => {
     setUrl('');
     setTitle('');
+    setDescription('');
     setError('');
   };
 
@@ -55,6 +57,7 @@ export function YouTubeForm({ apiUrl, onSuccess }: YouTubeFormProps) {
           thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
           embedUrl: `https://www.youtube.com/embed/${videoId}`,
           sourceUrl: canonicalUrl,
+          ...(description.trim() ? { description: description.trim() } : {}),
         },
       };
 
@@ -101,6 +104,13 @@ export function YouTubeForm({ apiUrl, onSuccess }: YouTubeFormProps) {
         value={title}
         onChange={setTitle}
         placeholder="Optional — defaults to 'YouTube Video'"
+      />
+      <TextArea
+        label="Description"
+        value={description}
+        onChange={setDescription}
+        placeholder="What's this video about?"
+        rows={2}
       />
       {error && (
         <div style={{ color: '#ff4444', fontSize: '0.82rem', margin: '0.5rem 0' }}>{error}</div>
