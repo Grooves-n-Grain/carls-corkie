@@ -143,6 +143,15 @@ export const PIN_TYPE_CONFIG: PinTypeConfig[] = [
       { name: 'url', label: 'URL', type: 'url', placeholder: 'https://reddit.com/...' },
     ],
   },
+  {
+    value: 'youtube',
+    label: 'YouTube',
+    emoji: '▶️',
+    fields: [
+      { name: 'url', label: 'YouTube URL', type: 'url', required: true, placeholder: 'https://youtube.com/watch?v=...' },
+      { name: 'title', label: 'Title', type: 'text', placeholder: 'Optional — auto-detected' },
+    ],
+  },
 ];
 
 export function getPinTypeConfig(type: PinType): PinTypeConfig | undefined {
