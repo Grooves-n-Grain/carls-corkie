@@ -35,6 +35,7 @@ interface PinRow {
   tracking_last_update: string | null;
   tracking_url: string | null;
   article_data: string | null;  // JSON string
+  youtube_data: string | null;  // JSON string
 }
 
 // Convert database row to Pin object
@@ -70,6 +71,7 @@ function rowToPin(row: PinRow): Pin {
     trackingLastUpdate: row.tracking_last_update ?? undefined,
     trackingUrl: row.tracking_url ?? undefined,
     articleData: row.article_data ? JSON.parse(row.article_data) : undefined,
+    youtubeData: row.youtube_data ? JSON.parse(row.youtube_data) : undefined,
   };
 }
 
@@ -85,8 +87,8 @@ const statements = {
   `),
   getById: db.prepare('SELECT * FROM pins WHERE id = ? AND deleted_at IS NULL'),
   insert: db.prepare(`
-    INSERT INTO pins (id, type, title, content, status, created_at, updated_at, url, due_at, priority, email_from, email_date, email_id, repo, stars, forks, idea_verdict, idea_scores, idea_competitors, idea_effort_estimate, idea_research_summary, tracking_number, tracking_carrier, tracking_status, tracking_location, tracking_eta, tracking_last_update, tracking_url, article_data)
-    VALUES (@id, @type, @title, @content, @status, @created_at, @updated_at, @url, @due_at, @priority, @email_from, @email_date, @email_id, @repo, @stars, @forks, @idea_verdict, @idea_scores, @idea_competitors, @idea_effort_estimate, @idea_research_summary, @tracking_number, @tracking_carrier, @tracking_status, @tracking_location, @tracking_eta, @tracking_last_update, @tracking_url, @article_data)
+    INSERT INTO pins (id, type, title, content, status, created_at, updated_at, url, due_at, priority, email_from, email_date, email_id, repo, stars, forks, idea_verdict, idea_scores, idea_competitors, idea_effort_estimate, idea_research_summary, tracking_number, tracking_carrier, tracking_status, tracking_location, tracking_eta, tracking_last_update, tracking_url, article_data, youtube_data)
+    VALUES (@id, @type, @title, @content, @status, @created_at, @updated_at, @url, @due_at, @priority, @email_from, @email_date, @email_id, @repo, @stars, @forks, @idea_verdict, @idea_scores, @idea_competitors, @idea_effort_estimate, @idea_research_summary, @tracking_number, @tracking_carrier, @tracking_status, @tracking_location, @tracking_eta, @tracking_last_update, @tracking_url, @article_data, @youtube_data)
   `),
   update: db.prepare(`
     UPDATE pins SET
@@ -115,7 +117,8 @@ const statements = {
       tracking_eta = @tracking_eta,
       tracking_last_update = @tracking_last_update,
       tracking_url = @tracking_url,
-      article_data = @article_data
+      article_data = @article_data,
+      youtube_data = @youtube_data
     WHERE id = @id
   `),
   softDelete: db.prepare('UPDATE pins SET deleted_at = ? WHERE id = ? AND deleted_at IS NULL'),
@@ -166,6 +169,7 @@ export function createPin(data: CreatePinRequest): Pin {
     tracking_last_update: data.trackingLastUpdate ?? null,
     tracking_url: data.trackingUrl ?? null,
     article_data: data.articleData ? JSON.stringify(data.articleData) : null,
+    youtube_data: data.youtubeData ? JSON.stringify(data.youtubeData) : null,
   });
 
   return getPin(id)!;
@@ -209,6 +213,7 @@ export function updatePin(id: string, data: UpdatePinRequest): Pin | null {
     tracking_last_update: data.trackingLastUpdate ?? existing.trackingLastUpdate ?? null,
     tracking_url: data.trackingUrl ?? existing.trackingUrl ?? null,
     article_data: data.articleData ? JSON.stringify(data.articleData) : existing.articleData ? JSON.stringify(existing.articleData) : null,
+    youtube_data: data.youtubeData ? JSON.stringify(data.youtubeData) : existing.youtubeData ? JSON.stringify(existing.youtubeData) : null,
   });
 
   return getPin(id)!;

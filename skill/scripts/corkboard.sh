@@ -35,6 +35,7 @@ TYPES:
     article      - Article summary with reader
     twitter      - X/Twitter post preview
     reddit       - Reddit post preview
+    youtube      - YouTube video card with player
 
 SPECIAL COMMANDS:
     corkboard add-email <from> <subject> [preview] [email_id]
@@ -46,6 +47,7 @@ SPECIAL COMMANDS:
     corkboard add-briefing <title> <content>
     corkboard add-twitter <title> <content> [url]
     corkboard add-reddit <title> <content> [url]
+    corkboard add-youtube <youtube-url>
 
 VERDICTS (for ideas):
     hot | warm | cold | pass
@@ -76,6 +78,7 @@ EXAMPLES:
     corkboard add-briefing "Morning briefing" "## Today\n- Ship the fix\n- Email the supplier"
     corkboard add-twitter "Interesting thread" "Thread about AI agents..." "https://x.com/user/status/123"
     corkboard add-reddit "Show HN" "New project launch..." "https://reddit.com/r/programming/..."
+    corkboard add-youtube "https://youtu.be/dQw4w9WgXcQ"
     corkboard list
     corkboard complete abc-123-def
 EOF
@@ -365,6 +368,111 @@ case "$1" in
             -d "$JSON")
 
         echo "$RESULT" | jq -r '"Created: \(.title) [reddit] (id: \(.id))"' 2>/dev/null || echo "$RESULT"
+        ;;
+
+    add-youtube)
+        URL="$2"
+
+        if [[ -z "$URL" ]]; then
+            echo "Error: YouTube URL required"
+            echo "Usage: corkboard add-youtube <youtube-url>"
+            exit 1
+        fi
+
+        # Extract video ID from various YouTube URL formats
+        VIDEO_ID=""
+        if [[ "$URL" =~ youtube\.com/watch\?.*v=([a-zA-Z0-9_-]{11}) ]]; then
+            VIDEO_ID="${BASH_REMATCH[1]}"
+        elif [[ "$URL" =~ youtu\.be/([a-zA-Z0-9_-]{11}) ]]; then
+            VIDEO_ID="${BASH_REMATCH[1]}"
+        elif [[ "$URL" =~ youtube\.com/shorts/([a-zA-Z0-9_-]{11}) ]]; then
+            VIDEO_ID="${BASH_REMATCH[1]}"
+        elif [[ "$URL" =~ youtube\.com/live/([a-zA-Z0-9_-]{11}) ]]; then
+            VIDEO_ID="${BASH_REMATCH[1]}"
+        fi
+
+        if [[ -z "$VIDEO_ID" ]]; then
+            echo "Error: Could not extract video ID from URL"
+            exit 1
+        fi
+
+        CANONICAL_URL="https://www.youtube.com/watch?v=$VIDEO_ID"
+        EMBED_URL="https://www.youtube.com/embed/$VIDEO_ID"
+        THUMB_URL="https://i.ytimg.com/vi/$VIDEO_ID/hqdefault.jpg"
+
+        # Try yt-dlp for rich metadata
+        TITLE=""
+        CHANNEL=""
+        DESCRIPTION=""
+        DURATION=""
+        PUBLISHED=""
+
+        if command -v yt-dlp &>/dev/null; then
+            YT_JSON=$(yt-dlp --dump-single-json --skip-download --no-warnings "$CANONICAL_URL" 2>/dev/null || echo "")
+            if [[ -n "$YT_JSON" ]]; then
+                TITLE=$(echo "$YT_JSON" | jq -r '.title // empty')
+                CHANNEL=$(echo "$YT_JSON" | jq -r '(.channel // .uploader) // empty')
+                DESCRIPTION=$(echo "$YT_JSON" | jq -r '.description // empty' | head -c 500)
+                THUMB_URL=$(echo "$YT_JSON" | jq -r '.thumbnail // empty')
+                DURATION_SECS=$(echo "$YT_JSON" | jq -r '.duration // empty')
+                UPLOAD_DATE=$(echo "$YT_JSON" | jq -r '.upload_date // empty')
+
+                if [[ -n "$DURATION_SECS" && "$DURATION_SECS" != "null" ]]; then
+                    HOURS=$((DURATION_SECS / 3600))
+                    MINS=$(( (DURATION_SECS % 3600) / 60 ))
+                    SECS=$((DURATION_SECS % 60))
+                    if [[ $HOURS -gt 0 ]]; then
+                        DURATION=$(printf "%d:%02d:%02d" "$HOURS" "$MINS" "$SECS")
+                    else
+                        DURATION=$(printf "%d:%02d" "$MINS" "$SECS")
+                    fi
+                fi
+
+                if [[ -n "$UPLOAD_DATE" && "$UPLOAD_DATE" != "null" && ${#UPLOAD_DATE} -eq 8 ]]; then
+                    PUBLISHED="${UPLOAD_DATE:0:4}-${UPLOAD_DATE:4:2}-${UPLOAD_DATE:6:2}T00:00:00Z"
+                fi
+            fi
+        fi
+
+        # Fallback to oEmbed if yt-dlp didn't work
+        if [[ -z "$TITLE" ]]; then
+            OEMBED=$(curl -s "https://www.youtube.com/oembed?url=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$CANONICAL_URL'))" 2>/dev/null || echo "$CANONICAL_URL")&format=json" 2>/dev/null || echo "")
+            if [[ -n "$OEMBED" ]]; then
+                TITLE=$(echo "$OEMBED" | jq -r '.title // empty')
+                CHANNEL=$(echo "$OEMBED" | jq -r '.author_name // empty')
+                OE_THUMB=$(echo "$OEMBED" | jq -r '.thumbnail_url // empty')
+                [[ -n "$OE_THUMB" ]] && THUMB_URL="$OE_THUMB"
+            fi
+        fi
+
+        [[ -z "$TITLE" ]] && TITLE="YouTube Video"
+        [[ -z "$THUMB_URL" || "$THUMB_URL" == "null" ]] && THUMB_URL="https://i.ytimg.com/vi/$VIDEO_ID/hqdefault.jpg"
+
+        # Build youtubeData object
+        YT_DATA=$(jq -n \
+            --arg videoId "$VIDEO_ID" \
+            --arg thumbnailUrl "$THUMB_URL" \
+            --arg embedUrl "$EMBED_URL" \
+            --arg sourceUrl "$CANONICAL_URL" \
+            '{videoId: $videoId, thumbnailUrl: $thumbnailUrl, embedUrl: $embedUrl, sourceUrl: $sourceUrl}')
+
+        [[ -n "$CHANNEL" ]] && YT_DATA=$(echo "$YT_DATA" | jq --arg v "$CHANNEL" '. + {channelTitle: $v}')
+        [[ -n "$DESCRIPTION" ]] && YT_DATA=$(echo "$YT_DATA" | jq --arg v "$DESCRIPTION" '. + {description: $v}')
+        [[ -n "$DURATION" ]] && YT_DATA=$(echo "$YT_DATA" | jq --arg v "$DURATION" '. + {duration: $v}')
+        [[ -n "$PUBLISHED" ]] && YT_DATA=$(echo "$YT_DATA" | jq --arg v "$PUBLISHED" '. + {publishedAt: $v}')
+
+        JSON=$(jq -n \
+            --arg type "youtube" \
+            --arg title "$TITLE" \
+            --arg url "$CANONICAL_URL" \
+            --argjson youtubeData "$YT_DATA" \
+            '{type: $type, title: $title, url: $url, youtubeData: $youtubeData}')
+
+        RESULT=$(curl -s -X POST "$API_URL" \
+            -H "Content-Type: application/json" \
+            -d "$JSON")
+
+        echo "$RESULT" | jq -r '"Created: \(.title) [youtube] (id: \(.id))"' 2>/dev/null || echo "$RESULT"
         ;;
 
     add-opportunity)

@@ -202,6 +202,108 @@ describe('Corkboard API', () => {
     });
   });
 
+  describe('YouTube pins', () => {
+    it('accepts a valid youtube pin payload', async () => {
+      const payload = {
+        type: 'youtube',
+        title: 'Demo video',
+        url: 'https://www.youtube.com/watch?v=abc123xyz00',
+        youtubeData: {
+          videoId: 'abc123xyz00',
+          thumbnailUrl: 'https://i.ytimg.com/vi/abc123xyz00/hqdefault.jpg',
+          channelTitle: 'Demo Channel',
+          description: 'A demo description',
+          publishedAt: '2026-04-09T12:00:00Z',
+          duration: '12:44',
+          embedUrl: 'https://www.youtube.com/embed/abc123xyz00',
+          sourceUrl: 'https://www.youtube.com/watch?v=abc123xyz00',
+        },
+      };
+
+      const res = await request(app).post('/api/pins').send(payload);
+      expect(res.status).toBe(201);
+      expect(res.body.type).toBe('youtube');
+      expect(res.body.youtubeData.videoId).toBe('abc123xyz00');
+      expect(res.body.youtubeData.thumbnailUrl).toBe('https://i.ytimg.com/vi/abc123xyz00/hqdefault.jpg');
+      expect(res.body.youtubeData.channelTitle).toBe('Demo Channel');
+      expect(res.body.youtubeData.duration).toBe('12:44');
+
+      createdPinId = res.body.id;
+    });
+
+    it('rejects youtube pin missing youtubeData.videoId', async () => {
+      const res = await request(app).post('/api/pins').send({
+        type: 'youtube',
+        title: 'Missing videoId',
+        url: 'https://www.youtube.com/watch?v=abc123xyz00',
+        youtubeData: {
+          thumbnailUrl: 'https://i.ytimg.com/vi/abc123xyz00/hqdefault.jpg',
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('youtubeData.videoId');
+    });
+
+    it('rejects youtube pin missing youtubeData.thumbnailUrl', async () => {
+      const res = await request(app).post('/api/pins').send({
+        type: 'youtube',
+        title: 'Missing thumbnail',
+        url: 'https://www.youtube.com/watch?v=abc123xyz00',
+        youtubeData: {
+          videoId: 'abc123xyz00',
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('youtubeData.thumbnailUrl');
+    });
+
+    it('rejects youtube pin with bad embedUrl', async () => {
+      const res = await request(app).post('/api/pins').send({
+        type: 'youtube',
+        title: 'Bad embedUrl',
+        url: 'https://www.youtube.com/watch?v=abc123xyz00',
+        youtubeData: {
+          videoId: 'abc123xyz00',
+          thumbnailUrl: 'https://i.ytimg.com/vi/abc123xyz00/hqdefault.jpg',
+          embedUrl: 'not-a-url',
+        },
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toContain('youtubeData.embedUrl');
+    });
+
+    it('round-trips youtubeData through create and fetch', async () => {
+      const payload = {
+        type: 'youtube',
+        title: 'Roundtrip test',
+        url: 'https://www.youtube.com/watch?v=roundtrip11',
+        youtubeData: {
+          videoId: 'roundtrip11',
+          thumbnailUrl: 'https://i.ytimg.com/vi/roundtrip11/hqdefault.jpg',
+          channelTitle: 'Test Channel',
+          embedUrl: 'https://www.youtube.com/embed/roundtrip11',
+          sourceUrl: 'https://www.youtube.com/watch?v=roundtrip11',
+        },
+      };
+
+      const createRes = await request(app).post('/api/pins').send(payload);
+      expect(createRes.status).toBe(201);
+      createdPinId = createRes.body.id;
+
+      const getRes = await request(app).get('/api/pins');
+      expect(getRes.status).toBe(200);
+
+      const pin = getRes.body.find((p: { id: string }) => p.id === createdPinId);
+      expect(pin).toBeDefined();
+      expect(pin.youtubeData).toBeDefined();
+      expect(pin.youtubeData.videoId).toBe('roundtrip11');
+      expect(pin.youtubeData.channelTitle).toBe('Test Channel');
+    });
+  });
+
   describe('POST /api/projects', () => {
     it('should return 400 for an invalid track owner', async () => {
       const res = await request(app)

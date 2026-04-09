@@ -26,6 +26,7 @@ const PIN_TYPES = [
   'article',
   'twitter',
   'reddit',
+  'youtube',
 ] as const;
 
 const PIN_STATUSES = ['active', 'completed', 'snoozed', 'dismissed'] as const;
@@ -179,6 +180,23 @@ function validateArticleData(value: unknown): CreatePinRequest['articleData'] | 
   };
 }
 
+function validateYouTubeData(value: unknown): CreatePinRequest['youtubeData'] | undefined {
+  if (value === undefined) return undefined;
+
+  const object = expectObject(value, 'youtubeData');
+
+  return {
+    videoId: expectNonEmptyString(object.videoId, 'youtubeData.videoId'),
+    thumbnailUrl: expectHttpUrl(object.thumbnailUrl, 'youtubeData.thumbnailUrl'),
+    channelTitle: optionalString(object.channelTitle, 'youtubeData.channelTitle'),
+    description: optionalString(object.description, 'youtubeData.description'),
+    publishedAt: optionalString(object.publishedAt, 'youtubeData.publishedAt'),
+    duration: optionalString(object.duration, 'youtubeData.duration'),
+    embedUrl: optionalHttpUrl(object.embedUrl, 'youtubeData.embedUrl'),
+    sourceUrl: optionalHttpUrl(object.sourceUrl, 'youtubeData.sourceUrl'),
+  };
+}
+
 function expectHttpUrl(value: unknown, field: string): string {
   const parsed = expectString(value, field);
   if (!isHttpUrl(parsed)) {
@@ -274,6 +292,7 @@ function validatePinBody(input: unknown, { partial }: { partial: boolean }): Cre
     ...(body.trackingLastUpdate !== undefined ? { trackingLastUpdate: optionalDateString(body.trackingLastUpdate, 'trackingLastUpdate') } : {}),
     ...(body.trackingUrl !== undefined ? { trackingUrl: expectHttpUrl(body.trackingUrl, 'trackingUrl') } : {}),
     ...(body.articleData !== undefined ? { articleData: validateArticleData(body.articleData) } : {}),
+    ...(body.youtubeData !== undefined ? { youtubeData: validateYouTubeData(body.youtubeData) } : {}),
   };
 }
 
