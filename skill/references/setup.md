@@ -74,7 +74,8 @@ export CORKBOARD_ALERT_URL="http://localhost:3011"
 
 - The backend binds to `0.0.0.0` by default, so the production app is reachable at both `http://localhost:3010` and `http://<lan-ip>:3010`.
 - The Vite dev server already listens on the LAN. If you open `http://<lan-ip>:5180` from another device during development, add that exact origin to `CORS_ORIGINS`.
-- This setup is intended for a trusted local network. Do not expose it directly to the public internet.
+- This setup is intended for a trusted local network. Do not expose corkie's port directly to the public internet.
+- If you need to let external services post pins (webhooks, remote automation, etc.) without exposing the dashboard, put corkie behind a reverse proxy that only forwards `/api/*` paths. See the "Exposing only the API" section of the main README for the nginx pattern. The LAN dashboard keeps working unchanged; only the API surface is reachable through the public hostname.
 
 Example dev CORS for a phone or tablet on your LAN:
 ```bash
@@ -109,8 +110,10 @@ Use the bundled script directly or alias it:
 ```bash
 chmod +x {baseDir}/scripts/corkboard.sh
 export CORKBOARD_API="http://localhost:3010"
-# or
+# or LAN:
 export CORKBOARD_API="http://<lan-ip>:3010"
+# or a public reverse-proxy hostname that forwards only /api/* to corkie:
+export CORKBOARD_API="https://corkie-api.example.com"
 ```
 
 The helper script is best for posting and managing pins quickly. Use direct REST calls for:

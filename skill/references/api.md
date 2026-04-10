@@ -2,7 +2,14 @@
 
 ## Base URL
 
-Use `http://localhost:3010` on the same machine or `http://<lan-ip>:3010` from another trusted device. The bundled CLI reads `CORKBOARD_API`.
+Use `http://localhost:3010` on the same machine or `http://<lan-ip>:3010` from
+another device on the same LAN. The bundled CLI reads `CORKBOARD_API`.
+
+If the dashboard operator has put corkie behind a reverse proxy to expose only
+`/api/*` externally (see the "Exposing only the API" section of the main README),
+`CORKBOARD_API` can also be set to a public HTTPS hostname like
+`https://corkie-api.example.com`. The bearer-token header is still required, and
+the frontend is not reachable through that hostname — only the API routes are.
 
 Responses are JSON unless noted otherwise. Validation failures return `400` with `{"error":"..."}`. Missing rows return `404`.
 
