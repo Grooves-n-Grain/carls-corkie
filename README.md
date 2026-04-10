@@ -130,6 +130,45 @@ nginx basic auth), you can opt out of the built-in token check by setting
 startup. **Do not do this if your dashboard is reachable from the internet
 without another auth layer in front of it.**
 
+### Exposing only the API (advanced, reverse-proxy blueprint)
+
+Some people want the dashboard to stay LAN-only but still let external services
+(webhooks, automation, remote scripts) post pins over the internet. This is not
+a built-in feature — corkie is a single process that serves both the API and
+the frontend — but any reverse proxy in front of corkie can enforce a path
+filter that blocks everything except `/api/*`. The frontend then becomes
+unreachable from the public hostname even though it's still running on the LAN.
+
+A minimal nginx location block (works in Nginx Proxy Manager, Caddy, or raw
+nginx) looks like:
+
+```nginx
+location / {
+    return 404;
+}
+
+location /api/ {
+    proxy_pass http://<corkie-lan-ip>:3010;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+Point a public hostname (Cloudflare Tunnel, ngrok, Caddy + Let's Encrypt, your
+choice) at that reverse proxy. Anyone hitting `https://your-hostname/` gets a
+404; only `/api/*` paths make it through, and they still have to pass the
+bearer-token check at corkie. Your LAN dashboard keeps working unchanged, and
+because corkie is still one process with one Socket.io instance, pins posted
+via the tunnel appear on the LAN dashboard in real-time.
+
+This is a pattern, not a feature. We don't ship it, we don't support your
+particular reverse-proxy choice, and if you get this wrong you can expose the
+dashboard to the internet — so test from an external device (phone on cellular
+works) before trusting it. **You are responsible for your own perimeter.**
+
 ### Security model — the small print
 
 - The token is baked into the client JS bundle and visible in browser DevTools.
