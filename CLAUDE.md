@@ -125,11 +125,15 @@ Reusable helpers in `client/src/utils/`:
 
 ## Environment Variables
 
-Server reads from `.env` when present outside test runs:
+Server reads from the repo-root `.env` when present outside test runs:
 ```
 PORT=3010
 CORKBOARD_HOST=0.0.0.0
 CORS_ORIGINS=http://localhost:5180,http://127.0.0.1:5180
+
+# Authentication — auto-generated on first `npm run dev` / `build` / `pm2:start`
+CORKBOARD_TOKEN=<64-char hex>
+# CORKBOARD_AUTH=disabled    # opt-out, only behind a reverse-proxy auth layer
 
 # Optional: Home Assistant lamp control
 HA_URL=http://192.168.1.100:8123
@@ -139,19 +143,56 @@ HA_LIGHT_ENTITY=light.my_light
 LAMP_SERVER=http://192.168.1.100:3011
 ```
 
-Client reads from `.env` (Vite prefix):
+Client also reads from the repo-root `.env` (via `envDir: '../'` in
+`client/vite.config.ts`):
 ```
-VITE_API_URL=     # Empty = same-origin (default for dev via proxy and prod via static serve)
+VITE_API_URL=             # Empty = same-origin (default for dev via proxy and prod via static serve)
 VITE_SOCKET_URL=
+VITE_CORKBOARD_TOKEN=     # Auto-set to match CORKBOARD_TOKEN by scripts/ensure-token.mjs
 ```
+
+The client token is inlined into the JS bundle at build time, so rotating
+`CORKBOARD_TOKEN` requires both a server restart and `npm run build` to make
+browsers pick it up.
+
+## Authentication
+
+- Server middleware in `server/src/auth.ts` mounted via `app.use('/api', requireToken)`
+  in `server/src/app.ts`. Reads `process.env.CORKBOARD_TOKEN` per request (NOT cached
+  at module load — keep this property if you refactor, otherwise tests break).
+- Socket.io handshake guard via `io.use(requireSocketToken)`. Rejects with
+  `connect_error` on bad/missing token.
+- Static files (`express.static`) and the SPA catch-all `app.get('*', ...)` stay
+  unauthenticated so the HTML shell can load.
+- `CORKBOARD_AUTH=disabled` bypasses both REST and Socket.io middleware.
+- All client REST calls go through `client/src/utils/apiFetch.ts`, which auto-attaches
+  the bearer header and surfaces 401 via `window.dispatchEvent('corkie:auth-error')`.
 
 ## Key Files
 
-- `server/src/app.ts` — Express routes and Socket.io setup
+- `server/src/app.ts` — Express routes, Socket.io setup, auth middleware mount
+- `server/src/auth.ts` — REST + Socket.io auth middleware
 - `server/src/db.ts` — Schema, migrations, database initialization
 - `server/src/pins.ts` / `server/src/projects.ts` — CRUD with prepared statements
 - `client/src/hooks/useSocket.ts` — Pin state management and real-time sync
 - `client/src/hooks/useProjects.ts` — Project state management and real-time sync
+- `client/src/utils/apiFetch.ts` — Central fetch wrapper with auth header injection
 - `client/src/components/Board/Board.tsx` — Main corkboard grid
 - `client/src/components/Projects/ProjectPipeline.tsx` — Kanban pipeline + cellar slide panel
+- `scripts/ensure-token.mjs` — First-run token generator (predev/prebuild/prepm2:start hook)
 - `shared/types.ts` — All shared TypeScript types
+
+## Graphify
+
+Use the `/graphify` skill to build a knowledge graph of this codebase for deep exploration or onboarding.
+
+```
+/graphify                              # Build graph on current directory
+/graphify --mode deep                  # Richer semantic extraction
+/graphify --update                     # Re-extract only changed files
+/graphify query "<question>"           # BFS traversal of the graph
+/graphify path "NodeA" "NodeB"         # Shortest path between concepts
+/graphify explain "NodeName"           # Plain-language explanation of a node
+```
+
+Output lands in `graphify-out/` at the repo root. The persistent `graphify-out/graph.json` can be queried in future sessions without re-reading files.

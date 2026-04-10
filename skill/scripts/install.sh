@@ -134,8 +134,12 @@ fi
 # --- Health check ---
 log "Checking if server is responding..."
 HEALTHY=0
+HEALTH_TOKEN=""
+if [[ -f "$INSTALL_DIR/.env" ]]; then
+    HEALTH_TOKEN=$(grep -E '^CORKBOARD_TOKEN=' "$INSTALL_DIR/.env" | tail -n1 | cut -d= -f2- | tr -d '"' | tr -d "'" | xargs || true)
+fi
 for i in 1 2 3 4 5; do
-    if curl -sf "http://localhost:$PORT/api/pins" >/dev/null 2>&1; then
+    if curl -sf -H "Authorization: Bearer $HEALTH_TOKEN" "http://localhost:$PORT/api/pins" >/dev/null 2>&1; then
         HEALTHY=1
         break
     fi
@@ -179,6 +183,11 @@ echo "  Skill:      $SKILL_DEST"
 echo ""
 echo "  Add to your environment:"
 echo "    export CORKBOARD_API=\"http://localhost:$PORT\""
+if [[ -n "$HEALTH_TOKEN" ]]; then
+    echo "    export CORKBOARD_TOKEN=\"$HEALTH_TOKEN\""
+fi
+echo ""
+echo "  Or run the corkboard CLI from $INSTALL_DIR (it auto-loads the token from .env)."
 echo ""
 echo "  Test it:"
 echo "    corkboard add task \"Hello from install\" \"Setup complete\" 2"

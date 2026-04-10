@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { formatTimeAgo } from '../../utils/dateUtils';
+import { apiFetch } from '../../utils/apiFetch';
 import './HistoryPanel.css';
 
 interface DeletedPin {
@@ -13,7 +14,6 @@ interface DeletedPin {
 interface HistoryPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  apiUrl: string;
   onRestore?: () => void;
 }
 
@@ -28,13 +28,13 @@ function getTypeEmoji(type: string): string {
   }
 }
 
-export function HistoryPanel({ isOpen, onClose, apiUrl, onRestore }: HistoryPanelProps) {
+export function HistoryPanel({ isOpen, onClose, onRestore }: HistoryPanelProps) {
   const [deletedPins, setDeletedPins] = useState<DeletedPin[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchHistory = () => {
     setLoading(true);
-    fetch(`${apiUrl}/api/pins/history/deleted`)
+    apiFetch('/api/pins/history/deleted')
       .then(res => res.json())
       .then(data => {
         setDeletedPins(data);
@@ -47,11 +47,11 @@ export function HistoryPanel({ isOpen, onClose, apiUrl, onRestore }: HistoryPane
     if (isOpen) {
       fetchHistory();
     }
-  }, [isOpen, apiUrl]);
+  }, [isOpen]);
 
   const handleRestore = async (id: string) => {
     try {
-      const res = await fetch(`${apiUrl}/api/pins/${id}/restore`, { method: 'POST' });
+      const res = await apiFetch(`/api/pins/${id}/restore`, { method: 'POST' });
       if (res.ok) {
         // Remove from local list
         setDeletedPins(prev => prev.filter(p => p.id !== id));

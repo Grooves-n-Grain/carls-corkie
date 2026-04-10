@@ -3,6 +3,9 @@ import request from 'supertest';
 import { app } from './app.js';
 import db from './db.js';
 
+const TEST_TOKEN = process.env.CORKBOARD_TOKEN!;
+const api = request.agent(app).set('Authorization', `Bearer ${TEST_TOKEN}`);
+
 describe('Corkboard API', () => {
   let createdPinId: string;
   let createdProjectIds: string[] = [];
@@ -10,19 +13,19 @@ describe('Corkboard API', () => {
   afterEach(async () => {
     // Clean up: delete pin if it was created
     if (createdPinId) {
-      await request(app).delete(`/api/pins/${createdPinId}`);
+      await api.delete(`/api/pins/${createdPinId}`);
       createdPinId = '';
     }
 
     for (const projectId of createdProjectIds) {
-      await request(app).delete(`/api/projects/${projectId}`);
+      await api.delete(`/api/projects/${projectId}`);
     }
     createdProjectIds = [];
   });
 
   describe('GET /api/pins', () => {
     it('should return an array of pins', async () => {
-      const res = await request(app).get('/api/pins');
+      const res = await api.get('/api/pins');
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -38,7 +41,7 @@ describe('Corkboard API', () => {
         priority: 2
       };
 
-      const res = await request(app)
+      const res = await api
         .post('/api/pins')
         .send(newPin);
 
@@ -52,7 +55,7 @@ describe('Corkboard API', () => {
     });
 
     it('should return 400 if type is missing', async () => {
-      const res = await request(app)
+      const res = await api
         .post('/api/pins')
         .send({ title: 'Missing type' });
 
@@ -61,7 +64,7 @@ describe('Corkboard API', () => {
     });
 
     it('should return 400 if title is missing', async () => {
-      const res = await request(app)
+      const res = await api
         .post('/api/pins')
         .send({ type: 'task' });
 
@@ -70,7 +73,7 @@ describe('Corkboard API', () => {
     });
 
     it('should return 400 for an invalid priority', async () => {
-      const res = await request(app)
+      const res = await api
         .post('/api/pins')
         .send({ type: 'task', title: 'Invalid priority', priority: 99 });
 
@@ -82,14 +85,14 @@ describe('Corkboard API', () => {
   describe('GET /api/pins/:id', () => {
     it('should return a specific pin', async () => {
       // First create a pin
-      const createRes = await request(app)
+      const createRes = await api
         .post('/api/pins')
         .send({ type: 'note', title: 'Test Note' });
 
       createdPinId = createRes.body.id;
 
       // Then fetch it
-      const res = await request(app).get(`/api/pins/${createdPinId}`);
+      const res = await api.get(`/api/pins/${createdPinId}`);
 
       expect(res.status).toBe(200);
       expect(res.body.id).toBe(createdPinId);
@@ -97,7 +100,7 @@ describe('Corkboard API', () => {
     });
 
     it('should return 404 for non-existent pin', async () => {
-      const res = await request(app).get('/api/pins/non-existent-id');
+      const res = await api.get('/api/pins/non-existent-id');
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Pin not found');
@@ -107,14 +110,14 @@ describe('Corkboard API', () => {
   describe('PATCH /api/pins/:id', () => {
     it('should update a pin', async () => {
       // First create a pin
-      const createRes = await request(app)
+      const createRes = await api
         .post('/api/pins')
         .send({ type: 'task', title: 'Original Title' });
 
       createdPinId = createRes.body.id;
 
       // Update it
-      const res = await request(app)
+      const res = await api
         .patch(`/api/pins/${createdPinId}`)
         .send({ title: 'Updated Title', status: 'completed' });
 
@@ -124,7 +127,7 @@ describe('Corkboard API', () => {
     });
 
     it('should return 404 for non-existent pin', async () => {
-      const res = await request(app)
+      const res = await api
         .patch('/api/pins/non-existent-id')
         .send({ title: 'Update' });
 
@@ -136,24 +139,24 @@ describe('Corkboard API', () => {
   describe('DELETE /api/pins/:id', () => {
     it('should delete a pin', async () => {
       // First create a pin
-      const createRes = await request(app)
+      const createRes = await api
         .post('/api/pins')
         .send({ type: 'alert', title: 'To Delete' });
 
       const pinId = createRes.body.id;
 
       // Delete it
-      const res = await request(app).delete(`/api/pins/${pinId}`);
+      const res = await api.delete(`/api/pins/${pinId}`);
 
       expect(res.status).toBe(204);
 
       // Verify it's deleted
-      const getRes = await request(app).get(`/api/pins/${pinId}`);
+      const getRes = await api.get(`/api/pins/${pinId}`);
       expect(getRes.status).toBe(404);
     });
 
     it('should return 404 for non-existent pin', async () => {
-      const res = await request(app).delete('/api/pins/non-existent-id');
+      const res = await api.delete('/api/pins/non-existent-id');
 
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Pin not found');
@@ -162,7 +165,7 @@ describe('Corkboard API', () => {
 
   describe('GET /api/pins/history/deleted', () => {
     it('should return deleted pins', async () => {
-      const res = await request(app).get('/api/pins/history/deleted');
+      const res = await api.get('/api/pins/history/deleted');
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
@@ -172,17 +175,17 @@ describe('Corkboard API', () => {
   describe('POST /api/pins/:id/restore', () => {
     it('should restore a deleted pin', async () => {
       // Create a pin
-      const createRes = await request(app)
+      const createRes = await api
         .post('/api/pins')
         .send({ type: 'task', title: 'To Restore' });
 
       const pinId = createRes.body.id;
 
       // Delete it
-      await request(app).delete(`/api/pins/${pinId}`);
+      await api.delete(`/api/pins/${pinId}`);
 
       // Restore it
-      const restoreRes = await request(app)
+      const restoreRes = await api
         .post(`/api/pins/${pinId}/restore`);
 
       expect(restoreRes.status).toBe(200);
@@ -194,7 +197,7 @@ describe('Corkboard API', () => {
     });
 
     it('should return 404 for non-existent pin', async () => {
-      const res = await request(app)
+      const res = await api
         .post('/api/pins/non-existent-id/restore');
 
       expect(res.status).toBe(404);
@@ -220,7 +223,7 @@ describe('Corkboard API', () => {
         },
       };
 
-      const res = await request(app).post('/api/pins').send(payload);
+      const res = await api.post('/api/pins').send(payload);
       expect(res.status).toBe(201);
       expect(res.body.type).toBe('youtube');
       expect(res.body.youtubeData.videoId).toBe('abc123xyz00');
@@ -232,7 +235,7 @@ describe('Corkboard API', () => {
     });
 
     it('rejects youtube pin missing youtubeData.videoId', async () => {
-      const res = await request(app).post('/api/pins').send({
+      const res = await api.post('/api/pins').send({
         type: 'youtube',
         title: 'Missing videoId',
         url: 'https://www.youtube.com/watch?v=abc123xyz00',
@@ -246,7 +249,7 @@ describe('Corkboard API', () => {
     });
 
     it('rejects youtube pin missing youtubeData.thumbnailUrl', async () => {
-      const res = await request(app).post('/api/pins').send({
+      const res = await api.post('/api/pins').send({
         type: 'youtube',
         title: 'Missing thumbnail',
         url: 'https://www.youtube.com/watch?v=abc123xyz00',
@@ -260,7 +263,7 @@ describe('Corkboard API', () => {
     });
 
     it('rejects youtube pin with bad embedUrl', async () => {
-      const res = await request(app).post('/api/pins').send({
+      const res = await api.post('/api/pins').send({
         type: 'youtube',
         title: 'Bad embedUrl',
         url: 'https://www.youtube.com/watch?v=abc123xyz00',
@@ -289,11 +292,11 @@ describe('Corkboard API', () => {
         },
       };
 
-      const createRes = await request(app).post('/api/pins').send(payload);
+      const createRes = await api.post('/api/pins').send(payload);
       expect(createRes.status).toBe(201);
       createdPinId = createRes.body.id;
 
-      const getRes = await request(app).get('/api/pins');
+      const getRes = await api.get('/api/pins');
       expect(getRes.status).toBe(200);
 
       const pin = getRes.body.find((p: { id: string }) => p.id === createdPinId);
@@ -306,7 +309,7 @@ describe('Corkboard API', () => {
 
   describe('POST /api/projects', () => {
     it('should return 400 for an invalid track owner', async () => {
-      const res = await request(app)
+      const res = await api
         .post('/api/projects')
         .send({
           name: 'Project with bad track owner',
@@ -318,7 +321,7 @@ describe('Corkboard API', () => {
     });
 
     it('backfills missing legacy task ids so each checkbox toggles independently', async () => {
-      const createRes = await request(app)
+      const createRes = await api
         .post('/api/projects')
         .send({
           name: 'Legacy Task Project',
@@ -339,7 +342,7 @@ describe('Corkboard API', () => {
         trackId,
       );
 
-      const getRes = await request(app).get(`/api/projects/${projectId}`);
+      const getRes = await api.get(`/api/projects/${projectId}`);
 
       expect(getRes.status).toBe(200);
       expect(getRes.body.tracks[0].tasks).toHaveLength(2);
@@ -349,7 +352,7 @@ describe('Corkboard API', () => {
 
       const secondTaskId = getRes.body.tracks[0].tasks[1].id as string;
 
-      const toggleRes = await request(app)
+      const toggleRes = await api
         .post(`/api/projects/${projectId}/tracks/${trackId}/tasks/${secondTaskId}/toggle`);
 
       expect(toggleRes.status).toBe(200);
@@ -360,20 +363,20 @@ describe('Corkboard API', () => {
 
   describe('POST /api/projects/:id/cellar', () => {
     it('moves a project to cellar status', async () => {
-      const createRes = await request(app)
+      const createRes = await api
         .post('/api/projects')
         .send({ name: 'Future Idea' });
       expect(createRes.status).toBe(201);
       const projectId = createRes.body.id as string;
       createdProjectIds.push(projectId);
 
-      const res = await request(app).post(`/api/projects/${projectId}/cellar`);
+      const res = await api.post(`/api/projects/${projectId}/cellar`);
       expect(res.status).toBe(200);
       expect(res.body.projectStatus).toBe('cellar');
     });
 
     it('returns 404 for non-existent project', async () => {
-      const res = await request(app).post('/api/projects/does-not-exist/cellar');
+      const res = await api.post('/api/projects/does-not-exist/cellar');
       expect(res.status).toBe(404);
       expect(res.body.error).toBe('Project not found');
     });

@@ -1,12 +1,12 @@
 import { useState, FormEvent } from 'react';
 import { TextInput, TextArea, DateTimeInput, SubmitButton } from './FormFields';
+import { apiFetch } from '../../../utils/apiFetch';
 
 interface EventFormProps {
-  apiUrl: string;
   onSuccess: () => void;
 }
 
-export function EventForm({ apiUrl, onSuccess }: EventFormProps) {
+export function EventForm({ onSuccess }: EventFormProps) {
   const [title, setTitle] = useState('');
   const [dueAt, setDueAt] = useState('');
   const [content, setContent] = useState('');
@@ -31,9 +31,8 @@ export function EventForm({ apiUrl, onSuccess }: EventFormProps) {
       if (dueAt) payload.dueAt = new Date(dueAt).toISOString();
       if (content.trim()) payload.content = content.trim();
 
-      const res = await fetch(`${apiUrl}/api/pins`, {
+      const res = await apiFetch('/api/pins', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 

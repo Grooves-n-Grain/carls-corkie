@@ -9,17 +9,22 @@
     "client"
   ],
   "scripts": {
+    "predev": "node scripts/ensure-token.mjs",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "npm run dev -w server",
     "dev:client": "npm run dev -w client",
+    "prebuild": "node scripts/ensure-token.mjs",
     "build": "npm run build -w server && npm run build -w client",
     "test": "npm run test:run -w client && npm run test:run -w server",
     "test:client": "npm run test -w client",
     "test:server": "npm run test -w server",
+    "prepm2:start": "node scripts/ensure-token.mjs",
     "pm2:start": "pm2 start ecosystem.config.cjs",
     "pm2:stop": "pm2 stop ecosystem.config.cjs",
     "pm2:restart": "pm2 restart ecosystem.config.cjs",
-    "pm2:logs": "pm2 logs --lines 50"
+    "pm2:logs": "pm2 logs --lines 50",
+    "token:rotate": "node scripts/ensure-token.mjs --rotate",
+    "token:show": "node scripts/ensure-token.mjs --show"
   },
   "overrides": {
     "path-to-regexp": "0.1.13",

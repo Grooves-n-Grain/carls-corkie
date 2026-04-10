@@ -1,5 +1,6 @@
 import { httpServer } from './app.js';
 import { config } from './config.js';
+import { logAuthStateOnStartup } from './auth.js';
 
 // Graceful shutdown handling
 const shutdown = (signal: string) => {
@@ -31,7 +32,9 @@ httpServer.listen(config.port, config.host, () => {
   Try: curl http://localhost:${config.port}/api/pins
   Binding: ${config.host}:${config.port}
   `);
-  
+
+  logAuthStateOnStartup();
+
   // Signal PM2 that we're ready (if using wait_ready)
   if (process.send) {
     process.send('ready');

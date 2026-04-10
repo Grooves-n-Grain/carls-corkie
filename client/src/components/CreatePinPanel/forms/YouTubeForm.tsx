@@ -1,8 +1,8 @@
 import { useState, FormEvent } from 'react';
 import { TextInput, TextArea, UrlInput, SubmitButton } from './FormFields';
+import { apiFetch } from '../../../utils/apiFetch';
 
 interface YouTubeFormProps {
-  apiUrl: string;
   onSuccess: () => void;
 }
 
@@ -18,7 +18,7 @@ function extractVideoId(url: string): string | null {
   return null;
 }
 
-export function YouTubeForm({ apiUrl, onSuccess }: YouTubeFormProps) {
+export function YouTubeForm({ onSuccess }: YouTubeFormProps) {
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -61,9 +61,8 @@ export function YouTubeForm({ apiUrl, onSuccess }: YouTubeFormProps) {
         },
       };
 
-      const res = await fetch(`${apiUrl}/api/pins`, {
+      const res = await apiFetch('/api/pins', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 

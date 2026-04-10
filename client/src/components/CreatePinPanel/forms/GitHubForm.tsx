@@ -1,12 +1,12 @@
 import { useState, FormEvent } from 'react';
 import { TextInput, TextArea, UrlInput, NumberInput, SubmitButton } from './FormFields';
+import { apiFetch } from '../../../utils/apiFetch';
 
 interface GitHubFormProps {
-  apiUrl: string;
   onSuccess: () => void;
 }
 
-export function GitHubForm({ apiUrl, onSuccess }: GitHubFormProps) {
+export function GitHubForm({ onSuccess }: GitHubFormProps) {
   const [title, setTitle] = useState('');
   const [repo, setRepo] = useState('');
   const [url, setUrl] = useState('');
@@ -40,9 +40,8 @@ export function GitHubForm({ apiUrl, onSuccess }: GitHubFormProps) {
       if (stars) payload.stars = parseInt(stars, 10);
       if (forks) payload.forks = parseInt(forks, 10);
 
-      const res = await fetch(`${apiUrl}/api/pins`, {
+      const res = await apiFetch('/api/pins', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 

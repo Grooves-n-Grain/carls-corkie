@@ -17,14 +17,17 @@ export CORKBOARD_REPO="https://github.com/zheroz00/carls-corkie.git"   # first-t
 bash {baseDir}/scripts/install.sh
 ```
 
-2. Point tooling at the running API. Use `localhost` on the same machine or the machine's LAN IP from another trusted device:
+2. Point tooling at the running API. Use `localhost` on the same machine or the machine's LAN IP from another trusted device. The dashboard now requires a bearer token; the helper script auto-loads it from `.env` in the install directory:
 ```bash
 CORKBOARD_API=http://localhost:3010
 # or
 CORKBOARD_API=http://<lan-ip>:3010
+
+# CORKBOARD_TOKEN is auto-loaded from .env. To set it manually:
+export CORKBOARD_TOKEN="$(grep '^CORKBOARD_TOKEN=' /path/to/dashboard/.env | cut -d= -f2-)"
 ```
 
-3. Post work with the bundled helper:
+3. Post work with the bundled helper (it adds the auth header for you):
 ```bash
 bash {baseDir}/scripts/corkboard.sh add task "Review PR" "Auth refactor complete" 1
 bash {baseDir}/scripts/corkboard.sh add alert "Server down" "API returning 503s" 1
@@ -33,13 +36,15 @@ bash {baseDir}/scripts/corkboard.sh add-opportunity "Wholesale inquiry" "Follow 
 bash {baseDir}/scripts/corkboard.sh add-briefing "Morning briefing" "## Today\n- Ship the fix\n- Reply to supplier"
 ```
 
-4. Use the REST API directly for projects, cellar ideas, history/restore, track updates, and lamp state:
+4. Use the REST API directly for projects, cellar ideas, history/restore, track updates, and lamp state. Every request to `/api/*` needs the `Authorization: Bearer $CORKBOARD_TOKEN` header:
 ```bash
 curl -X POST "$CORKBOARD_API/api/pins" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"type":"task","title":"Review PR","content":"Auth refactor complete","priority":1}'
 
 curl -X POST "$CORKBOARD_API/api/projects" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"name":"Launch blog","emoji":"✍️","phase":"build","tracks":[{"name":"Write posts","owner":"claude"},{"name":"Review","owner":"you"}]}'
 ```
@@ -52,7 +57,7 @@ curl -X POST "$CORKBOARD_API/api/projects" \
 - Tracks are owned by `claude`, `you`, or `shared`; finishing a track can automatically create a follow-up task pin for the next handoff.
 - Use deleted pin history plus restore routes when something should come back to the board instead of being recreated from scratch.
 - Prefer `priority: 1` for urgent work, `2` for the normal default, and `3` for low urgency.
-- Keep the dashboard on a trusted LAN. This setup is intentionally unauthenticated.
+- The dashboard ships with a shared bearer token (`CORKBOARD_TOKEN`) generated on first run. Keep `.env` private; the helper script reads the token from there automatically. To disable auth (only behind a reverse-proxy auth layer), set `CORKBOARD_AUTH=disabled` in `.env`.
 
 ## Common Actions
 
@@ -70,10 +75,10 @@ bash {baseDir}/scripts/corkboard.sh add-briefing <title> <content>
 bash {baseDir}/scripts/corkboard.sh add-twitter <title> <content> [url]
 bash {baseDir}/scripts/corkboard.sh add-reddit <title> <content> [url]
 bash {baseDir}/scripts/corkboard.sh add-youtube <youtube-url>
-curl "$CORKBOARD_API/api/pins/history/deleted"
-curl -X POST "$CORKBOARD_API/api/pins/<pin-id>/restore"
-curl -X POST "$CORKBOARD_API/api/projects/<project-id>/cellar"
-curl -X POST "$CORKBOARD_API/api/lamp/waiting"
+curl -H "Authorization: Bearer $CORKBOARD_TOKEN" "$CORKBOARD_API/api/pins/history/deleted"
+curl -X POST -H "Authorization: Bearer $CORKBOARD_TOKEN" "$CORKBOARD_API/api/pins/<pin-id>/restore"
+curl -X POST -H "Authorization: Bearer $CORKBOARD_TOKEN" "$CORKBOARD_API/api/projects/<project-id>/cellar"
+curl -X POST -H "Authorization: Bearer $CORKBOARD_TOKEN" "$CORKBOARD_API/api/lamp/waiting"
 ```
 
 ## References

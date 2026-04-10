@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import type { Pin } from '../../types/pin';
 import { getRotation } from '../../utils/pinUtils';
-import { API_URL } from '../../hooks/useSocket';
+import { apiFetch } from '../../utils/apiFetch';
 import './TaskPin.css';
 
 interface TaskPinProps {
@@ -85,11 +85,10 @@ export function TaskPin({ pin, onToggleComplete, onDelete }: TaskPinProps) {
         target.checked = !target.checked;
         const newContent = serializeContent(lines);
         // PATCH the pin content via API
-        fetch(`${API_URL}/api/pins/${pin.id}`, {
+        apiFetch(`/api/pins/${pin.id}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ content: newContent }),
-        });
+        }).catch((err) => console.error('Failed to update task content:', err));
       }
     },
     [pin.id, pin.content]

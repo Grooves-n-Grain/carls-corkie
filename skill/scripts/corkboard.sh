@@ -3,11 +3,34 @@
 # Usage: corkboard <action> <type> <title> [content] [priority]
 #
 # Environment:
-#   CORKBOARD_API      - API endpoint (default: http://localhost:3010)
+#   CORKBOARD_API       - API endpoint (default: http://localhost:3010)
+#   CORKBOARD_TOKEN     - Bearer token for the corkboard server. If unset, the
+#                         script reads it from $CORKBOARD_ENV_FILE (default .env
+#                         in the current directory).
+#   CORKBOARD_ENV_FILE  - .env file to load CORKBOARD_TOKEN from (default: ./.env)
+#   CORKBOARD_AUTH      - set to "disabled" to skip auth (matches server flag)
 #   CORKBOARD_ALERT_URL - Alert server for focus+sound (optional)
 
 API_URL="${CORKBOARD_API:-http://localhost:3010}/api/pins"
 ALERT_URL="${CORKBOARD_ALERT_URL:-}"
+
+# Load CORKBOARD_TOKEN from .env if not already set in the shell environment.
+if [[ -z "$CORKBOARD_TOKEN" ]]; then
+    ENV_FILE="${CORKBOARD_ENV_FILE:-.env}"
+    if [[ -f "$ENV_FILE" ]]; then
+        CORKBOARD_TOKEN=$(grep -E '^CORKBOARD_TOKEN=' "$ENV_FILE" | tail -n1 | cut -d= -f2- | tr -d '"' | tr -d "'" | xargs)
+    fi
+fi
+
+if [[ -z "$CORKBOARD_TOKEN" && "${CORKBOARD_AUTH:-}" != "disabled" ]]; then
+    echo "Error: CORKBOARD_TOKEN not set and no .env file found." >&2
+    echo "  Set CORKBOARD_TOKEN in your environment, run from the repo root, or" >&2
+    echo "  point CORKBOARD_ENV_FILE at a .env file containing CORKBOARD_TOKEN." >&2
+    echo "  If your server runs with CORKBOARD_AUTH=disabled, set the same here." >&2
+    exit 1
+fi
+
+AUTH_HEADER=(-H "Authorization: Bearer ${CORKBOARD_TOKEN}")
 
 show_help() {
     cat << 'EOF'
@@ -62,6 +85,10 @@ PRIORITY:
 
 ENVIRONMENT:
     CORKBOARD_API       API endpoint (default: http://localhost:3010)
+    CORKBOARD_TOKEN     Bearer token for the corkboard server. Auto-loaded
+                        from .env in the current directory if unset.
+    CORKBOARD_ENV_FILE  Path to .env file (default: ./.env)
+    CORKBOARD_AUTH      Set to "disabled" to skip auth (matches server flag)
     CORKBOARD_ALERT_URL Alert server URL (optional)
 
 EXAMPLES:
@@ -115,6 +142,7 @@ case "$1" in
         fi
 
         RESULT=$(curl -s -X POST "$API_URL" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d "$JSON")
 
@@ -122,7 +150,7 @@ case "$1" in
         ;;
 
     list)
-        curl -s "$API_URL" | jq -r '.[] | "[\(.type)] \(.title) (\(.status)) - \(.id)"' 2>/dev/null
+        curl -s "${AUTH_HEADER[@]}" "$API_URL" | jq -r '.[] | "[\(.type)] \(.title) (\(.status)) - \(.id)"' 2>/dev/null
         ;;
 
     complete)
@@ -132,6 +160,7 @@ case "$1" in
             exit 1
         fi
         curl -s -X PATCH "$API_URL/$ID" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d '{"status":"completed"}' | jq -r '"Completed: \(.title)"' 2>/dev/null
         ;;
@@ -142,7 +171,7 @@ case "$1" in
             echo "Error: id required"
             exit 1
         fi
-        curl -s -X DELETE "$API_URL/$ID"
+        curl -s -X DELETE "${AUTH_HEADER[@]}" "$API_URL/$ID"
         echo "Deleted: $ID"
         ;;
 
@@ -185,6 +214,7 @@ case "$1" in
             '{type: $type, title: $title, content: $content, repo: $repo, url: $url, stars: $stars, forks: $forks}')
 
         RESULT=$(curl -s -X POST "$API_URL" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d "$JSON")
 
@@ -219,6 +249,7 @@ case "$1" in
         fi
 
         RESULT=$(curl -s -X POST "$API_URL" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d "$JSON")
 
@@ -246,6 +277,7 @@ case "$1" in
             '{type: $type, title: $title, content: $content, emailFrom: $emailFrom, emailId: $emailId, priority: 2}')
 
         RESULT=$(curl -s -X POST "$API_URL" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d "$JSON")
 
@@ -283,6 +315,7 @@ case "$1" in
         fi
 
         RESULT=$(curl -s -X POST "$API_URL" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d "$JSON")
 
@@ -314,6 +347,7 @@ case "$1" in
             '{type: $type, title: $title, url: $url, articleData: {url: $url, source: $source, tldr: $tldr, bullets: $bullets, tags: $tags}}')
 
         RESULT=$(curl -s -X POST "$API_URL" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d "$JSON")
 
@@ -339,6 +373,7 @@ case "$1" in
             '{type: $type, title: $title, content: $content, url: $url}')
 
         RESULT=$(curl -s -X POST "$API_URL" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d "$JSON")
 
@@ -364,6 +399,7 @@ case "$1" in
             '{type: $type, title: $title, content: $content, url: $url}')
 
         RESULT=$(curl -s -X POST "$API_URL" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d "$JSON")
 
@@ -469,6 +505,7 @@ case "$1" in
             '{type: $type, title: $title, url: $url, youtubeData: $youtubeData}')
 
         RESULT=$(curl -s -X POST "$API_URL" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d "$JSON")
 
@@ -494,6 +531,7 @@ case "$1" in
             '{type: $type, title: $title, content: $content, priority: $priority}')
 
         RESULT=$(curl -s -X POST "$API_URL" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d "$JSON")
 
@@ -517,6 +555,7 @@ case "$1" in
             '{type: $type, title: $title, content: $content}')
 
         RESULT=$(curl -s -X POST "$API_URL" \
+            "${AUTH_HEADER[@]}" \
             -H "Content-Type: application/json" \
             -d "$JSON")
 

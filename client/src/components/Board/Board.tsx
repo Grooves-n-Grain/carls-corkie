@@ -22,10 +22,9 @@ import { ProjectPipeline } from '../Projects/ProjectPipeline';
 import { NewProjectModal } from '../Projects/NewProjectModal';
 import type { useProjects } from '../../hooks/useProjects';
 import { parseLampState, type LampState } from '../../utils/lampUtils';
+import { apiFetch } from '../../utils/apiFetch';
 import '../Projects/Projects.css';
 import './Board.css';
-// Use relative API path to go through the corkboard server proxy (avoids HTTPS->HTTP mixed content)
-const LAMP_API = '/api';
 
 interface BoardProps {
   pins: Pin[];
@@ -36,13 +35,12 @@ interface BoardProps {
   onDelete: (id: string) => void;
   isFocusMode: boolean;
   onToggleFocusMode: () => void;
-  apiUrl: string;
   currentView: 'board' | 'projects';
   onToggleView: () => void;
   projectHook: ReturnType<typeof useProjects>;
 }
 
-export function Board({ pins, isConnected, connectionStatus, transport, onToggleComplete, onDelete, isFocusMode, onToggleFocusMode, apiUrl, currentView, onToggleView, projectHook }: BoardProps) {
+export function Board({ pins, isConnected, connectionStatus, transport, onToggleComplete, onDelete, isFocusMode, onToggleFocusMode, currentView, onToggleView, projectHook }: BoardProps) {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [createPanelOpen, setCreatePanelOpen] = useState(false);
   const [projectCreateOpen, setProjectCreateOpen] = useState(false);
@@ -52,7 +50,7 @@ export function Board({ pins, isConnected, connectionStatus, transport, onToggle
   useEffect(() => {
     const fetchLampStatus = async () => {
       try {
-        const res = await fetch(`${LAMP_API}/lamp/status`);
+        const res = await apiFetch('/api/lamp/status');
         if (res.ok) {
           const data = await res.json();
           setLampState(parseLampState(data.state));
@@ -61,7 +59,7 @@ export function Board({ pins, isConnected, connectionStatus, transport, onToggle
         // Silent fail - lamp server might be down
       }
     };
-    
+
     fetchLampStatus();
     const interval = setInterval(fetchLampStatus, 5000);
     return () => clearInterval(interval);
@@ -70,7 +68,7 @@ export function Board({ pins, isConnected, connectionStatus, transport, onToggle
   // Set lamp state
   const handleSetLampState = useCallback(async (state: LampState) => {
     try {
-      await fetch(`${LAMP_API}/lamp/${state}`, { method: 'POST' });
+      await apiFetch(`/api/lamp/${state}`, { method: 'POST' });
       setLampState(state);
     } catch (e) {
       console.error('Failed to set lamp state:', e);
@@ -393,14 +391,12 @@ export function Board({ pins, isConnected, connectionStatus, transport, onToggle
       <HistoryPanel
         isOpen={historyOpen}
         onClose={() => setHistoryOpen(false)}
-        apiUrl={apiUrl}
         onRestore={() => setHistoryOpen(false)}
       />
 
       <CreatePinPanel
         isOpen={createPanelOpen}
         onClose={() => setCreatePanelOpen(false)}
-        apiUrl={apiUrl}
       />
     </div>
   );

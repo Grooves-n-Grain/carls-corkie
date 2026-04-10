@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import type { ServerToClientEvents, ClientToServerEvents } from '../types/pin';
 import type { Project, CreateProjectRequest, UpdateProjectRequest } from '../types/project';
 import { config } from '../config';
+import { apiFetch } from '../utils/apiFetch';
 
 type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
@@ -12,11 +13,19 @@ export function useProjects() {
 
   useEffect(() => {
     const sock: TypedSocket = io(config.socketUrl, {
+      auth: { token: config.token },
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
+    });
+
+    sock.on('connect_error', (err) => {
+      console.error('[corkie] projects socket connect_error:', err.message);
+      if (err.message === 'Unauthorized') {
+        window.dispatchEvent(new CustomEvent('corkie:auth-error', { detail: { source: 'socket' } }));
+      }
     });
 
     sock.on('projects:sync', (synced) => {
@@ -43,9 +52,8 @@ export function useProjects() {
 
   const createProject = useCallback(async (data: CreateProjectRequest): Promise<Project | null> => {
     try {
-      const res = await fetch(`${config.apiUrl}/api/projects`, {
+      const res = await apiFetch('/api/projects', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       if (!res.ok) return null;
@@ -55,9 +63,8 @@ export function useProjects() {
 
   const updateProject = useCallback(async (id: string, data: UpdateProjectRequest): Promise<Project | null> => {
     try {
-      const res = await fetch(`${config.apiUrl}/api/projects/${id}`, {
+      const res = await apiFetch(`/api/projects/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       if (!res.ok) return null;
@@ -67,16 +74,15 @@ export function useProjects() {
 
   const deleteProject = useCallback(async (id: string): Promise<boolean> => {
     try {
-      const res = await fetch(`${config.apiUrl}/api/projects/${id}`, { method: 'DELETE' });
+      const res = await apiFetch(`/api/projects/${id}`, { method: 'DELETE' });
       return res.ok;
     } catch { return false; }
   }, []);
 
   const holdProject = useCallback(async (id: string, reason: string): Promise<Project | null> => {
     try {
-      const res = await fetch(`${config.apiUrl}/api/projects/${id}/hold`, {
+      const res = await apiFetch(`/api/projects/${id}/hold`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reason }),
       });
       if (!res.ok) return null;
@@ -86,7 +92,7 @@ export function useProjects() {
 
   const resumeProject = useCallback(async (id: string): Promise<Project | null> => {
     try {
-      const res = await fetch(`${config.apiUrl}/api/projects/${id}/resume`, { method: 'POST' });
+      const res = await apiFetch(`/api/projects/${id}/resume`, { method: 'POST' });
       if (!res.ok) return null;
       return res.json();
     } catch { return null; }
@@ -94,7 +100,7 @@ export function useProjects() {
 
   const archiveProject = useCallback(async (id: string): Promise<Project | null> => {
     try {
-      const res = await fetch(`${config.apiUrl}/api/projects/${id}/archive`, { method: 'POST' });
+      const res = await apiFetch(`/api/projects/${id}/archive`, { method: 'POST' });
       if (!res.ok) return null;
       return res.json();
     } catch { return null; }
@@ -102,7 +108,7 @@ export function useProjects() {
 
   const cellarProject = useCallback(async (id: string): Promise<Project | null> => {
     try {
-      const res = await fetch(`${config.apiUrl}/api/projects/${id}/cellar`, { method: 'POST' });
+      const res = await apiFetch(`/api/projects/${id}/cellar`, { method: 'POST' });
       if (!res.ok) return null;
       return res.json();
     } catch { return null; }
@@ -122,9 +128,8 @@ export function useProjects() {
     data: Record<string, unknown>
   ): Promise<Project | null> => {
     try {
-      const res = await fetch(`${config.apiUrl}/api/projects/${projectId}/tracks/${trackId}`, {
+      const res = await apiFetch(`/api/projects/${projectId}/tracks/${trackId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
       if (!res.ok) return null;
@@ -137,9 +142,8 @@ export function useProjects() {
     order: string[]
   ): Promise<Project | null> => {
     try {
-      const res = await fetch(`${config.apiUrl}/api/projects/${projectId}/tracks/reorder`, {
+      const res = await apiFetch(`/api/projects/${projectId}/tracks/reorder`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ order }),
       });
       if (!res.ok) return null;

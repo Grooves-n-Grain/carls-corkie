@@ -29,7 +29,6 @@ This dashboard flips that on its head. Instead of *you* managing a todo list, yo
 ```bash
 git clone https://github.com/zheroz00/carls-corkie.git
 cd carls-corkie
-cp .env.example .env
 npm install
 npm run dev
 ```
@@ -37,7 +36,11 @@ npm run dev
 Dashboard opens at **http://localhost:5180**. API at **http://localhost:3010**.
 On the same LAN, dev mode is also reachable at **http://<your-lan-ip>:5180**.
 
-That's it. SQLite is embedded, no external database to set up.
+That's it. SQLite is embedded, no external database to set up. On first run the
+app generates a random `CORKBOARD_TOKEN` in `.env` (gitignored) and bakes the
+matching `VITE_CORKBOARD_TOKEN` into the client bundle, so authentication just
+works out of the box. See [Authentication](#authentication) below if you need
+to rotate, share, or disable it.
 
 ## Configuration
 
@@ -73,7 +76,70 @@ CORS_ORIGINS=http://localhost:5180,http://192.168.1.50:5180
 
 Then open `http://192.168.1.50:5180` from your phone/tablet.
 
-Keep the dashboard on a trusted network. This repo does not add an auth layer.
+## Authentication
+
+Carl's Corkie is a single-user, self-hosted tool. It ships with a shared bearer
+token to keep random scanners and accidental port forwards from poking at your
+board, but it is **not** a multi-user permission system.
+
+**On first run**, `npm run dev` (or `npm run build`, or `npm run pm2:start`)
+generates a random hex token and writes it into both `CORKBOARD_TOKEN` and
+`VITE_CORKBOARD_TOKEN` in `.env`. The server reads the first; the client bundle
+inlines the second at build time. They must match. `.env` is gitignored.
+
+You should not need to do anything for the happy path — it just works.
+
+### Sending requests as an external tool
+
+The bundled `skill/scripts/corkboard.sh` reads `CORKBOARD_TOKEN` from your shell
+env or from `.env` in the current directory automatically. If you're hand-rolling
+curl, include the bearer header:
+
+```bash
+export CORKBOARD_API="http://localhost:3010"
+export CORKBOARD_TOKEN="$(grep '^CORKBOARD_TOKEN=' .env | cut -d= -f2-)"
+
+curl -X POST "$CORKBOARD_API/api/pins" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"type":"task","title":"Hello"}'
+```
+
+### Rotating the token
+
+```bash
+npm run token:rotate     # generate a new token in .env
+npm run pm2:restart      # (or restart your dev server)
+npm run build            # rebuild the client so the new token is baked in
+```
+
+External senders will need the new value too — re-source `.env` or update your
+shell env.
+
+### Showing the current token
+
+```bash
+npm run token:show
+```
+
+### Disabling auth (only behind a reverse proxy)
+
+If you terminate auth at a reverse proxy (Tailscale, Authelia, Cloudflare Access,
+nginx basic auth), you can opt out of the built-in token check by setting
+`CORKBOARD_AUTH=disabled` in `.env`. The server will print a loud warning on
+startup. **Do not do this if your dashboard is reachable from the internet
+without another auth layer in front of it.**
+
+### Security model — the small print
+
+- The token is baked into the client JS bundle and visible in browser DevTools.
+  Anyone who can load the dashboard URL gets a copy of the token. This is
+  expected: the token gates the API at the network layer, not per-user.
+- For real "family member can view, only I can edit" semantics you need a real
+  identity layer (cookies, OAuth, SSO). That's outside the scope of this repo.
+- TLS is your responsibility. Run the dashboard behind a reverse proxy with HTTPS
+  if it's reachable from anywhere you don't fully trust. The token rides in plain
+  HTTP headers.
 
 ## Pin types
 
@@ -168,8 +234,12 @@ Pins and projects are managed through a REST API. Your AI assistant, scripts, or
 
 ### Creating a pin
 
+> All examples below assume `CORKBOARD_TOKEN` is exported in your shell. See
+> [Authentication](#authentication) for how to obtain it from your `.env`.
+
 ```bash
 curl -X POST http://localhost:3010/api/pins \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"type":"task","title":"Review the PR","priority":1}'
 ```
@@ -179,11 +249,13 @@ curl -X POST http://localhost:3010/api/pins \
 ```bash
 # Link pin
 curl -X POST http://localhost:3010/api/pins \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"type":"link","title":"Check this out","url":"https://example.com"}'
 
 # Event with a due date
 curl -X POST http://localhost:3010/api/pins \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"type":"event","title":"Standup in 15 minutes","dueAt":"2025-01-15T09:00:00Z"}'
 ```
@@ -209,6 +281,8 @@ Or use the helper directly against a running instance:
 
 ```bash
 export CORKBOARD_API="http://localhost:3010"
+# CORKBOARD_TOKEN is auto-loaded from .env if you run from the repo root.
+# Otherwise: export CORKBOARD_TOKEN="$(grep '^CORKBOARD_TOKEN=' /path/to/.env | cut -d= -f2-)"
 bash skill/scripts/corkboard.sh add task "Review PR" "Auth refactor complete" 1
 ```
 

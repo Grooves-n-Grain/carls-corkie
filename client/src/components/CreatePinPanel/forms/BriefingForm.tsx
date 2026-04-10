@@ -1,12 +1,12 @@
 import { useState, FormEvent } from 'react';
 import { TextInput, TextArea, SubmitButton } from './FormFields';
+import { apiFetch } from '../../../utils/apiFetch';
 
 interface BriefingFormProps {
-  apiUrl: string;
   onSuccess: () => void;
 }
 
-export function BriefingForm({ apiUrl, onSuccess }: BriefingFormProps) {
+export function BriefingForm({ onSuccess }: BriefingFormProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,9 +28,8 @@ export function BriefingForm({ apiUrl, onSuccess }: BriefingFormProps) {
       };
       if (content.trim()) payload.content = content.trim();
 
-      const res = await fetch(`${apiUrl}/api/pins`, {
+      const res = await apiFetch('/api/pins', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 

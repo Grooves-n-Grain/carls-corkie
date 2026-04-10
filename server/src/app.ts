@@ -16,6 +16,7 @@ import type {
 import * as pinStore from './pins.js';
 import * as projectStore from './projects.js';
 import { config } from './config.js';
+import { requireToken, requireSocketToken } from './auth.js';
 import {
   ValidationError,
   validateAddTrackRequest,
@@ -52,6 +53,12 @@ export const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpSer
 // Middleware
 app.use(cors({ origin: config.corsOrigins }));
 app.use(express.json());
+
+// Auth — must be after body parsing and before any /api routes (including the
+// lamp routes registered later in this file). Static files stay unauthenticated
+// so the HTML shell and client bundle can load before the browser authenticates.
+app.use('/api', requireToken);
+io.use(requireSocketToken);
 
 // REST API Routes
 

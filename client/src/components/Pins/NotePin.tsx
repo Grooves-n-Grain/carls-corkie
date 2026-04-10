@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import type { Pin } from '../../types/pin';
 import { getRotation } from '../../utils/pinUtils';
-import { API_URL } from '../../hooks/useSocket';
+import { apiFetch } from '../../utils/apiFetch';
 import './NotePin.css';
 
 interface NotePinProps {
@@ -78,11 +78,10 @@ export function NotePin({ pin, onToggleComplete, onDelete }: NotePinProps) {
       if (target && target.type === 'checklist') {
         target.checked = !target.checked;
         const newContent = serializeContent(lines);
-        fetch(`${API_URL}/api/pins/${pin.id}`, {
+        apiFetch(`/api/pins/${pin.id}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ content: newContent }),
-        });
+        }).catch((err) => console.error('Failed to update note content:', err));
       }
     },
     [pin.id, pin.content]
