@@ -17,11 +17,13 @@ export CORKBOARD_REPO="https://github.com/zheroz00/carls-corkie.git"   # first-t
 bash {baseDir}/scripts/install.sh
 ```
 
-2. Point tooling at the running API. Use `localhost` on the same machine or the machine's LAN IP from another trusted device. The dashboard now requires a bearer token; the helper script auto-loads it from `.env` in the install directory:
+2. Point tooling at the running API. Use `localhost` on the same machine, the machine's LAN IP from another trusted device, or a public reverse-proxy hostname if the operator has exposed `/api/*` externally (see the main README). The dashboard requires a bearer token; the helper script auto-loads it from `.env` in the install directory:
 ```bash
 CORKBOARD_API=http://localhost:3010
-# or
+# or LAN:
 CORKBOARD_API=http://<lan-ip>:3010
+# or public reverse-proxy hostname (API routes only, frontend not exposed):
+CORKBOARD_API=https://corkie-api.example.com
 
 # CORKBOARD_TOKEN is auto-loaded from .env. To set it manually:
 export CORKBOARD_TOKEN="$(grep '^CORKBOARD_TOKEN=' /path/to/dashboard/.env | cut -d= -f2-)"
