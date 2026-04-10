@@ -55,6 +55,12 @@ Every REST mutation broadcasts via Socket.io to sync all clients:
 Pin types are defined in `shared/types.ts` and rendered via matching components in `client/src/components/Pins/`.  
 Pin status: `active | completed | snoozed | dismissed`
 
+**Adding a new pin type** requires changes in 4 places:
+1. `shared/types.ts` — add to `PinType` union and `Pin` interface (with any type-specific fields)
+2. `server/src/validation.ts` — add to `PIN_TYPES` array and any validation logic
+3. `client/src/components/Pins/` — create `{TypeName}Pin.tsx` + `{TypeName}Pin.css`
+4. `client/src/App.tsx` — import and register in the component map
+
 ### Project System
 
 Kanban-style pipeline with status: `active | on-hold | archived | cellar`.
@@ -74,6 +80,22 @@ Server uses prepared statements (`server/src/pins.ts`, `server/src/projects.ts`)
 ### CSS Patterns
 
 Vanilla CSS files per component — no CSS-in-JS. CSS custom properties (`--board-bg`, `--pin-bg`, `--project-color`, etc.) for theming. Slide panels use `transform: translateX()` animations.
+
+### Dev Proxy
+
+Vite proxies `/api` and `/socket.io` to Express (port 3010) in dev — no CORS configuration needed locally.
+
+### Testing
+
+Both workspaces use Vitest with `globals: true` — no explicit `import { describe, it, expect }` needed. Client tests run under jsdom with React Testing Library; server tests use Supertest against an isolated temp SQLite database.
+
+### Utility Functions
+
+Reusable helpers in `client/src/utils/`:
+- `dateUtils.ts` — `formatTimeAgo()`, `formatEmailDate()`
+- `pinUtils.ts` — `getRotation(id)` for deterministic pin tilt derived from pin ID
+- `lampUtils.ts` — `parseLampState()` with states `waiting | idle | attention | urgent | success | off`
+- `urlUtils.ts` — `getSafeHttpUrl()`, `openSafeExternalUrl()`
 
 ## API Endpoints
 
