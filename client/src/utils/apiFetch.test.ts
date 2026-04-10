@@ -5,6 +5,10 @@ vi.mock('../config', () => ({
 }));
 
 import { apiFetch, ApiAuthError, setAuthErrorHandler } from './apiFetch';
+import { config } from '../config';
+
+type MutableConfig = { apiUrl: string; socketUrl: string; token: string };
+const mutableConfig = config as unknown as MutableConfig;
 
 describe('apiFetch', () => {
   let fetchMock: ReturnType<typeof vi.fn>;
@@ -15,6 +19,8 @@ describe('apiFetch', () => {
     fetchMock = vi.fn().mockResolvedValue(ok({ ok: true }));
     vi.stubGlobal('fetch', fetchMock);
     setAuthErrorHandler(null);
+    mutableConfig.apiUrl = '';
+    mutableConfig.token = 'test-token-abc';
   });
 
   afterEach(() => {
@@ -63,6 +69,41 @@ describe('apiFetch', () => {
   it('passes absolute URLs through unchanged', async () => {
     await apiFetch('https://example.com/api/pins');
     expect(lastUrl()).toBe('https://example.com/api/pins');
+  });
+
+  it('does NOT attach Authorization to absolute external URLs (token leakage guard)', async () => {
+    await apiFetch('https://evil.example.com/steal');
+    expect(lastHeaders().has('Authorization')).toBe(false);
+  });
+
+  it('DOES attach Authorization to absolute URLs that match config.apiUrl', async () => {
+    mutableConfig.apiUrl = 'https://corkie.example.com';
+    await apiFetch('https://corkie.example.com/api/pins');
+    expect(lastHeaders().get('Authorization')).toBe('Bearer test-token-abc');
+  });
+
+  it('does NOT attach Authorization when apiUrl is set but URL points elsewhere', async () => {
+    mutableConfig.apiUrl = 'https://corkie.example.com';
+    await apiFetch('https://other.example.com/api/pins');
+    expect(lastHeaders().has('Authorization')).toBe(false);
+  });
+
+  it('does NOT attach Content-Type for FormData bodies', async () => {
+    const fd = new FormData();
+    fd.append('file', new Blob(['hello'], { type: 'text/plain' }), 'hello.txt');
+    await apiFetch('/api/pins', { method: 'POST', body: fd });
+    expect(lastHeaders().has('Content-Type')).toBe(false);
+  });
+
+  it('does NOT attach Content-Type for Blob bodies', async () => {
+    const blob = new Blob(['raw'], { type: 'application/octet-stream' });
+    await apiFetch('/api/pins', { method: 'POST', body: blob });
+    expect(lastHeaders().has('Content-Type')).toBe(false);
+  });
+
+  it('DOES attach Content-Type when body is a string', async () => {
+    await apiFetch('/api/pins', { method: 'POST', body: JSON.stringify({ x: 1 }) });
+    expect(lastHeaders().get('Content-Type')).toBe('application/json');
   });
 
   it('returns the response on success', async () => {

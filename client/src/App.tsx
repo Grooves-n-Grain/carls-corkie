@@ -28,11 +28,6 @@ function App() {
         <div
           role="alert"
           style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 9999,
             background: '#7a1a1a',
             color: '#fff',
             padding: '0.85rem 1.2rem',
