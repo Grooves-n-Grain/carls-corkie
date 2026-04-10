@@ -2,10 +2,9 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import type { Pin, ServerToClientEvents, ClientToServerEvents } from '../types/pin';
 import { config } from '../config';
+import { apiFetch } from '../utils/apiFetch';
 
 type TypedSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
-
-export const API_URL = config.apiUrl;
 
 export type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting' | 'reconnected';
 export type TransportType = 'websocket' | 'polling' | 'unknown';
@@ -20,11 +19,20 @@ export function useSocket() {
 
   useEffect(() => {
     const newSocket: TypedSocket = io(config.socketUrl, {
+      auth: { token: config.token },
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
+    });
+
+    newSocket.on('connect_error', (err) => {
+      console.error('[corkie] socket connect_error:', err.message);
+      if (err.message === 'Unauthorized') {
+        setConnectionStatus('disconnected');
+        window.dispatchEvent(new CustomEvent('corkie:auth-error', { detail: { source: 'socket' } }));
+      }
     });
 
     newSocket.on('connect', () => {
@@ -113,12 +121,7 @@ export function useSocket() {
   const deletePin = useCallback(
     async (id: string) => {
       try {
-        const res = await fetch(`${config.apiUrl}/api/pins/${id}`, {
-          method: 'DELETE'
-        });
-        if (res.ok) {
-          // Server will broadcast pin:deleted via websocket
-        }
+        await apiFetch(`/api/pins/${id}`, { method: 'DELETE' });
       } catch (err) {
         console.error('Failed to delete pin:', err);
       }
@@ -130,11 +133,10 @@ export function useSocket() {
     (id: string, currentStatus: string) => {
       if (currentStatus === 'completed') {
         // Uncomplete - set back to active via REST API
-        fetch(`${config.apiUrl}/api/pins/${id}`, {
+        apiFetch(`/api/pins/${id}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: 'active' })
-        });
+        }).catch((err) => console.error('Failed to uncomplete pin:', err));
       } else if (currentStatus === 'dismissed') {
         // Dismiss (for alerts)
         socket?.emit('pin:dismiss', id);

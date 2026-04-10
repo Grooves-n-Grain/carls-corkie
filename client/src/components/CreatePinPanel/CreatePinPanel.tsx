@@ -15,10 +15,9 @@ import './CreatePinPanel.css';
 interface CreatePinPanelProps {
   isOpen: boolean;
   onClose: () => void;
-  apiUrl: string;
 }
 
-export function CreatePinPanel({ isOpen, onClose, apiUrl }: CreatePinPanelProps) {
+export function CreatePinPanel({ isOpen, onClose }: CreatePinPanelProps) {
   const [selectedType, setSelectedType] = useState<PinType>('task');
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -28,7 +27,7 @@ export function CreatePinPanel({ isOpen, onClose, apiUrl }: CreatePinPanelProps)
   }, []);
 
   const renderForm = () => {
-    const formProps = { apiUrl, onSuccess: handleSuccess };
+    const formProps = { onSuccess: handleSuccess };
 
     switch (selectedType) {
       case 'task':

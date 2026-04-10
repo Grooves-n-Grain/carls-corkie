@@ -1,12 +1,12 @@
 import { useState, FormEvent } from 'react';
 import { TextInput, TextArea, SubmitButton } from './FormFields';
+import { apiFetch } from '../../../utils/apiFetch';
 
 interface AlertFormProps {
-  apiUrl: string;
   onSuccess: () => void;
 }
 
-export function AlertForm({ apiUrl, onSuccess }: AlertFormProps) {
+export function AlertForm({ onSuccess }: AlertFormProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,9 +28,8 @@ export function AlertForm({ apiUrl, onSuccess }: AlertFormProps) {
       };
       if (content.trim()) payload.content = content.trim();
 
-      const res = await fetch(`${apiUrl}/api/pins`, {
+      const res = await apiFetch('/api/pins', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 

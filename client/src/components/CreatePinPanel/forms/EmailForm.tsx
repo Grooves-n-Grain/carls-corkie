@@ -1,12 +1,12 @@
 import { useState, FormEvent } from 'react';
 import { TextInput, TextArea, DateTimeInput, SubmitButton } from './FormFields';
+import { apiFetch } from '../../../utils/apiFetch';
 
 interface EmailFormProps {
-  apiUrl: string;
   onSuccess: () => void;
 }
 
-export function EmailForm({ apiUrl, onSuccess }: EmailFormProps) {
+export function EmailForm({ onSuccess }: EmailFormProps) {
   const [title, setTitle] = useState('');
   const [emailFrom, setEmailFrom] = useState('');
   const [emailDate, setEmailDate] = useState('');
@@ -37,9 +37,8 @@ export function EmailForm({ apiUrl, onSuccess }: EmailFormProps) {
       if (content.trim()) payload.content = content.trim();
       if (emailId.trim()) payload.emailId = emailId.trim();
 
-      const res = await fetch(`${apiUrl}/api/pins`, {
+      const res = await apiFetch('/api/pins', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 

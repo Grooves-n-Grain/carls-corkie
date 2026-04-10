@@ -1,5 +1,9 @@
 # Pin Types Reference
 
+> All curl examples below assume `CORKBOARD_TOKEN` is exported in your shell.
+> See `references/setup.md` or `references/api.md#authentication` for how to
+> obtain it.
+
 ## Shared Fields
 
 Every pin includes:
@@ -161,6 +165,7 @@ Supported URL formats for the `url` field:
 Task:
 ```bash
 curl -X POST "$CORKBOARD_API/api/pins" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"type":"task","title":"Review PR","content":"Auth refactor complete","priority":1}'
 ```
@@ -168,6 +173,7 @@ curl -X POST "$CORKBOARD_API/api/pins" \
 Opportunity:
 ```bash
 curl -X POST "$CORKBOARD_API/api/pins" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "type":"opportunity",
@@ -182,6 +188,7 @@ curl -X POST "$CORKBOARD_API/api/pins" \
 Tracking:
 ```bash
 curl -X POST "$CORKBOARD_API/api/pins" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "type":"tracking",
@@ -196,6 +203,7 @@ curl -X POST "$CORKBOARD_API/api/pins" \
 Article:
 ```bash
 curl -X POST "$CORKBOARD_API/api/pins" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "type":"article",
@@ -214,6 +222,7 @@ curl -X POST "$CORKBOARD_API/api/pins" \
 YouTube:
 ```bash
 curl -X POST "$CORKBOARD_API/api/pins" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "type":"youtube",

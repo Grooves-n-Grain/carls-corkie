@@ -1,12 +1,12 @@
 import { useState, FormEvent } from 'react';
 import { TextInput, TextArea, UrlInput, SubmitButton } from './FormFields';
+import { apiFetch } from '../../../utils/apiFetch';
 
 interface LinkFormProps {
-  apiUrl: string;
   onSuccess: () => void;
 }
 
-export function LinkForm({ apiUrl, onSuccess }: LinkFormProps) {
+export function LinkForm({ onSuccess }: LinkFormProps) {
   const [title, setTitle] = useState('');
   const [url, setUrl] = useState('');
   const [content, setContent] = useState('');
@@ -31,9 +31,8 @@ export function LinkForm({ apiUrl, onSuccess }: LinkFormProps) {
       if (url.trim()) payload.url = url.trim();
       if (content.trim()) payload.content = content.trim();
 
-      const res = await fetch(`${apiUrl}/api/pins`, {
+      const res = await apiFetch('/api/pins', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 

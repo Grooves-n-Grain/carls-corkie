@@ -10,6 +10,8 @@ process.env.HA_URL = '';
 process.env.HA_TOKEN = '';
 process.env.HA_LIGHT_ENTITY = 'light.my_light';
 process.env.LAMP_SERVER = '';
+process.env.CORKBOARD_TOKEN = 'test-token-fixed-for-supertest';
+delete process.env.CORKBOARD_AUTH;
 
 process.on('exit', () => {
   rmSync(tempDir, { recursive: true, force: true });

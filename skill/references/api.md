@@ -6,6 +6,26 @@ Use `http://localhost:3010` on the same machine or `http://<lan-ip>:3010` from a
 
 Responses are JSON unless noted otherwise. Validation failures return `400` with `{"error":"..."}`. Missing rows return `404`.
 
+## Authentication
+
+Every request to `/api/*` requires an `Authorization: Bearer <token>` header. The
+token lives in the dashboard's `.env` as `CORKBOARD_TOKEN` and is auto-generated
+on first run. The bundled `corkboard.sh` helper loads it for you; for raw curl,
+export it explicitly:
+
+```bash
+export CORKBOARD_TOKEN="$(grep '^CORKBOARD_TOKEN=' /path/to/dashboard/.env | cut -d= -f2-)"
+```
+
+Missing/invalid tokens return `401` with `WWW-Authenticate: Bearer realm="corkboard"`.
+
+Socket.IO clients must pass `{ auth: { token: '<value>' } }` in the connect options;
+the handshake is hard-rejected with a `connect_error` event when the token is wrong.
+
+If your dashboard sits behind a reverse-proxy auth layer, the server admin can set
+`CORKBOARD_AUTH=disabled` in `.env` to bypass these checks. Don't do this on a
+public-facing instance without another auth layer in front of it.
+
 ## Pins
 
 | Method | Endpoint | Notes |
@@ -21,6 +41,7 @@ Responses are JSON unless noted otherwise. Validation failures return `400` with
 Example:
 ```bash
 curl -X POST "$CORKBOARD_API/api/pins" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"type":"task","title":"Review PR","content":"Auth refactor complete","priority":1}'
 ```
@@ -99,6 +120,7 @@ Track update notes:
 Project example:
 ```bash
 curl -X POST "$CORKBOARD_API/api/projects" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "name":"Launch blog",
@@ -115,6 +137,7 @@ curl -X POST "$CORKBOARD_API/api/projects" \
 Cellar example:
 ```bash
 curl -X POST "$CORKBOARD_API/api/projects" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
     "name":"Retail display concept",

@@ -1,12 +1,12 @@
 import { useState, FormEvent } from 'react';
 import { TextInput, TextArea, PrioritySelect, DateTimeInput, SubmitButton } from './FormFields';
+import { apiFetch } from '../../../utils/apiFetch';
 
 interface TaskFormProps {
-  apiUrl: string;
   onSuccess: () => void;
 }
 
-export function TaskForm({ apiUrl, onSuccess }: TaskFormProps) {
+export function TaskForm({ onSuccess }: TaskFormProps) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [priority, setPriority] = useState(2);
@@ -34,9 +34,8 @@ export function TaskForm({ apiUrl, onSuccess }: TaskFormProps) {
       if (content.trim()) payload.content = content.trim();
       if (dueAt) payload.dueAt = new Date(dueAt).toISOString();
 
-      const res = await fetch(`${apiUrl}/api/pins`, {
+      const res = await apiFetch('/api/pins', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
