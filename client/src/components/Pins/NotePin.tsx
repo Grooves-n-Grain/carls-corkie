@@ -1,8 +1,7 @@
-import { useCallback } from 'react';
+import { useMemo } from 'react';
 import type { Pin } from '../../types/pin';
 import { getRotation } from '../../utils/pinUtils';
-import { apiFetch } from '../../utils/apiFetch';
-import { parseContent, serializeContent } from '../../utils/pinContentUtils';
+import { parseContent, toggleChecklistItem } from '../../utils/pinContentUtils';
 import { usePinEdit } from '../../hooks/usePinEdit';
 import './NotePin.css';
 
@@ -26,40 +25,16 @@ export function NotePin({ pin, onToggleComplete, onDelete }: NotePinProps) {
     startEdit,
     save,
     cancel,
-    deferredSave,
     handleKeyDown,
+    handleEditBlur,
+    isSaving,
   } = usePinEdit({ pin });
 
-  const parsedLines = pin.content ? parseContent(pin.content) : [];
+  const parsedLines = useMemo(
+    () => (pin.content ? parseContent(pin.content) : []),
+    [pin.content]
+  );
   const hasChecklist = parsedLines.some((l) => l.type === 'checklist');
-
-  const handleItemToggle = useCallback(
-    (lineIndex: number) => {
-      if (!pin.content) return;
-      const lines = parseContent(pin.content);
-      const target = lines[lineIndex];
-      if (target && target.type === 'checklist') {
-        target.checked = !target.checked;
-        const newContent = serializeContent(lines);
-        apiFetch(`/api/pins/${pin.id}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ content: newContent }),
-        }).catch((err) => console.error('Failed to update note content:', err));
-      }
-    },
-    [pin.id, pin.content]
-  );
-
-  // Only trigger deferred save when focus leaves the entire edit area,
-  // not when tabbing between title input and content textarea.
-  const handleEditBlur = useCallback(
-    (e: React.FocusEvent<HTMLDivElement>) => {
-      if (!e.currentTarget.contains(e.relatedTarget)) {
-        deferredSave();
-      }
-    },
-    [deferredSave]
-  );
 
   return (
     <article
@@ -122,7 +97,7 @@ export function NotePin({ pin, onToggleComplete, onDelete }: NotePinProps) {
                 </button>
                 <button
                   className="note-pin__edit-save"
-                  disabled={!draftTitle.trim()}
+                  disabled={!draftTitle.trim() || isSaving}
                   onMouseDown={(e) => { e.preventDefault(); save(); }}
                 >
                   Save
@@ -145,7 +120,7 @@ export function NotePin({ pin, onToggleComplete, onDelete }: NotePinProps) {
                             <input
                               type="checkbox"
                               checked={line.checked}
-                              onChange={() => handleItemToggle(i)}
+                              onChange={() => toggleChecklistItem(pin.id, pin.content!, i)}
                               className="note-pin__item-input"
                             />
                             <span className="note-pin__item-box" />

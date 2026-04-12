@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { Pin } from '../types/pin';
 import { apiFetch } from '../utils/apiFetch';
 
@@ -77,11 +77,12 @@ export function usePinEdit({ pin }: UsePinEditOptions) {
   // edit area — individual field-to-field tabs are handled by the container
   // onBlur with relatedTarget checking in the component.
   const deferredSave = useCallback(() => {
+    if (isSaving) return;
     saveTimeoutRef.current = setTimeout(() => {
       saveTimeoutRef.current = null;
       save();
     }, 0);
-  }, [save]);
+  }, [save, isSaving]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -96,7 +97,21 @@ export function usePinEdit({ pin }: UsePinEditOptions) {
     [cancel, save]
   );
 
-  const contentRows = Math.max(3, Math.min(8, (draftContent.split('\n').length || 1) + 1));
+  // Only trigger deferred save when focus leaves the entire edit area,
+  // not when tabbing between title input and content textarea.
+  const handleEditBlur = useCallback(
+    (e: React.FocusEvent<HTMLDivElement>) => {
+      if (!e.currentTarget.contains(e.relatedTarget)) {
+        deferredSave();
+      }
+    },
+    [deferredSave]
+  );
+
+  const contentRows = useMemo(
+    () => Math.max(3, Math.min(8, (draftContent.split('\n').length || 1) + 1)),
+    [draftContent]
+  );
 
   return {
     isEditing,
@@ -111,5 +126,6 @@ export function usePinEdit({ pin }: UsePinEditOptions) {
     cancel,
     deferredSave,
     handleKeyDown,
+    handleEditBlur,
   };
 }
