@@ -44,3 +44,8 @@ tmp/
 
 # Git worktrees
 .worktrees/
+
+# Claude Code agents and plugins
+.agents/
+.playwright-mcp/
+skills-lock.json
