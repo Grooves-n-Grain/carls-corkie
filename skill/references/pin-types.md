@@ -52,8 +52,8 @@ Notes:
 
 | Type | Use for | Key fields |
 |------|---------|------------|
-| `task` | Action items | `content`, `priority`, `dueAt` |
-| `note` | Reference context | `content` |
+| `task` | Action items (inline-editable via double-click on title) | `content`, `priority`, `dueAt` |
+| `note` | Reference context (inline-editable via double-click on title) | `content` |
 | `link` | External links | `url` |
 | `event` | Time-sensitive reminders | `content`, `dueAt`, `priority` |
 | `alert` | Urgent notices | `content`, usually `priority: 1` |

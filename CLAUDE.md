@@ -43,6 +43,7 @@ Client uses custom hooks — no Redux or Context:
 - **`useSocket`** — manages all pin state, Socket.io connection, reconnection, and emits (`pin:complete`, `pin:dismiss`, `pins:request`)
 - **`useProjects`** — manages project state via Socket.io; exposes computed filters (`activeProjects`, `onHoldProjects`, `archivedProjects`, `cellarProjects`) and methods (`createProject`, `updateProject`, `holdProject`, `resumeProject`, `archiveProject`, `cellarProject`, `createCellarProject`)
 - **`useFocusMode`** — localStorage-based zen mode toggle
+- **`usePinEdit`** — inline editing state for Task and Note pins (edit mode, draft values, save/cancel lifecycle, blur/click race handling)
 
 ### Real-time Communication
 
@@ -54,6 +55,8 @@ Every REST mutation broadcasts via Socket.io to sync all clients:
 
 Pin types are defined in `shared/types.ts` and rendered via matching components in `client/src/components/Pins/`.  
 Pin status: `active | completed | snoozed | dismissed`
+
+**Inline editing** — Task and Note pins support double-click-to-edit on the title. This enters inline edit mode where the title becomes an input and content becomes a textarea. Save via Ctrl+Enter, blur, or the Save button; cancel via Escape. The `usePinEdit` hook manages all edit state and calls `PATCH /api/pins/:id` directly (same fire-and-forget pattern as checklist toggles). Checklist items use `stopPropagation` on double-click so rapid checkbox clicks don't trigger edit mode.
 
 **Adding a new pin type** requires changes in 4 places:
 1. `shared/types.ts` — add to `PinType` union and `Pin` interface (with any type-specific fields)
@@ -96,6 +99,7 @@ Reusable helpers in `client/src/utils/`:
 - `pinUtils.ts` — `getRotation(id)` for deterministic pin tilt derived from pin ID
 - `lampUtils.ts` — `parseLampState()` with states `waiting | idle | attention | urgent | success | off`
 - `urlUtils.ts` — `getSafeHttpUrl()`, `openSafeExternalUrl()`
+- `pinContentUtils.ts` — shared checklist parsing/serialization (`parseContent`, `serializeContent`) used by TaskPin and NotePin
 
 ## API Endpoints
 
@@ -176,6 +180,7 @@ browsers pick it up.
 - `server/src/pins.ts` / `server/src/projects.ts` — CRUD with prepared statements
 - `client/src/hooks/useSocket.ts` — Pin state management and real-time sync
 - `client/src/hooks/useProjects.ts` — Project state management and real-time sync
+- `client/src/hooks/usePinEdit.ts` — Inline editing hook for Task and Note pins
 - `client/src/utils/apiFetch.ts` — Central fetch wrapper with auth header injection
 - `client/src/components/Board/Board.tsx` — Main corkboard grid
 - `client/src/components/Projects/ProjectPipeline.tsx` — Kanban pipeline + cellar slide panel

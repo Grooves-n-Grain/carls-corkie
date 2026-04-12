@@ -186,8 +186,8 @@ Pins are the core unit. Each type has its own look and behavior:
 
 | Type | What it's for |
 |------|--------------|
-| `task` | Action items with priority levels and checklists |
-| `note` | Reference info — not actionable, just context |
+| `task` | Action items with priority levels and checklists (double-click title to edit) |
+| `note` | Reference info — not actionable, just context (double-click title to edit) |
 | `link` | URLs you need to visit (clickable, opens in new tab) |
 | `event` | Time-sensitive reminders with due dates |
 | `alert` | Urgent notifications — build failures, server down, etc. |

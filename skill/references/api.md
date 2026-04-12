@@ -55,6 +55,7 @@ curl -X POST "$CORKBOARD_API/api/pins" \
 
 Important request fields:
 - Required on create: `type`, `title`
+- On update (PATCH): all fields are optional; `title` and `content` are commonly updated for Task and Note pins (the dashboard supports inline editing of these via double-click on the title)
 - Common optional fields: `content`, `url`, `dueAt`, `priority`, `status`
 - Valid `status` values: `active | completed | snoozed | dismissed`
 - Valid `priority` values: `1 | 2 | 3`; create defaults to `2`

@@ -2,6 +2,8 @@ import { useCallback } from 'react';
 import type { Pin } from '../../types/pin';
 import { getRotation } from '../../utils/pinUtils';
 import { apiFetch } from '../../utils/apiFetch';
+import { parseContent, serializeContent } from '../../utils/pinContentUtils';
+import { usePinEdit } from '../../hooks/usePinEdit';
 import './TaskPin.css';
 
 interface TaskPinProps {
@@ -10,64 +12,23 @@ interface TaskPinProps {
   onDelete: () => void;
 }
 
-// Bullet characters we recognize as checklist items
-const BULLET_RE = /^([\u25B8\u25CF\u25A0\u2022\u2023\u25E6\u25AA\u25AB\u25B9►●■•‣◦▪▫\-\*])\s*(.*)/;
-// Markdown-style checkbox: [ ] or [x]
-const CHECKBOX_RE = /^\[([ xX])\]\s*(.*)/;
-
-interface ContentLine {
-  type: 'text' | 'checklist';
-  text: string;
-  checked: boolean;
-  bullet?: string;
-  originalIndex: number;
-}
-
-function parseContent(content: string): ContentLine[] {
-  return content.split('\n').map((line, i) => {
-    // First check for markdown checkboxes
-    const cbMatch = line.match(CHECKBOX_RE);
-    if (cbMatch) {
-      return {
-        type: 'checklist' as const,
-        text: cbMatch[2],
-        checked: cbMatch[1].toLowerCase() === 'x',
-        originalIndex: i,
-      };
-    }
-    // Then check for bullet characters — treat as unchecked checklist items
-    const bulletMatch = line.match(BULLET_RE);
-    if (bulletMatch) {
-      return {
-        type: 'checklist' as const,
-        text: bulletMatch[2],
-        checked: false,
-        bullet: bulletMatch[1],
-        originalIndex: i,
-      };
-    }
-    return {
-      type: 'text' as const,
-      text: line,
-      checked: false,
-      originalIndex: i,
-    };
-  });
-}
-
-function serializeContent(lines: ContentLine[]): string {
-  return lines.map((line) => {
-    if (line.type === 'checklist') {
-      const mark = line.checked ? 'x' : ' ';
-      return `[${mark}] ${line.text}`;
-    }
-    return line.text;
-  }).join('\n');
-}
-
 export function TaskPin({ pin, onToggleComplete, onDelete }: TaskPinProps) {
   const isCompleted = pin.status === 'completed';
   const rotation = getRotation(pin.id);
+
+  const {
+    isEditing,
+    draftTitle,
+    draftContent,
+    contentRows,
+    setDraftTitle,
+    setDraftContent,
+    startEdit,
+    save,
+    cancel,
+    deferredSave,
+    handleKeyDown,
+  } = usePinEdit({ pin });
 
   const priorityClass = pin.priority
     ? `task-pin__priority--${pin.priority === 1 ? 'high' : pin.priority === 2 ? 'medium' : 'low'}`
@@ -84,7 +45,6 @@ export function TaskPin({ pin, onToggleComplete, onDelete }: TaskPinProps) {
       if (target && target.type === 'checklist') {
         target.checked = !target.checked;
         const newContent = serializeContent(lines);
-        // PATCH the pin content via API
         apiFetch(`/api/pins/${pin.id}`, {
           method: 'PATCH',
           body: JSON.stringify({ content: newContent }),
@@ -94,9 +54,20 @@ export function TaskPin({ pin, onToggleComplete, onDelete }: TaskPinProps) {
     [pin.id, pin.content]
   );
 
+  // Only trigger deferred save when focus leaves the entire edit area,
+  // not when tabbing between title input and content textarea.
+  const handleEditBlur = useCallback(
+    (e: React.FocusEvent<HTMLDivElement>) => {
+      if (!e.currentTarget.contains(e.relatedTarget)) {
+        deferredSave();
+      }
+    },
+    [deferredSave]
+  );
+
   return (
     <article
-      className={`task-pin ${isCompleted ? 'task-pin--completed' : ''}`}
+      className={`task-pin ${isCompleted ? 'task-pin--completed' : ''} ${isEditing ? 'task-pin--editing' : ''}`}
       style={{ '--pin-rotation': `${rotation}deg` } as React.CSSProperties}
       aria-label={`Task: ${pin.title}`}
     >
@@ -133,39 +104,81 @@ export function TaskPin({ pin, onToggleComplete, onDelete }: TaskPinProps) {
         </label>
 
         {/* Text content */}
-        <div className="task-pin__text">
-          <h3 className="task-pin__title">{pin.title}</h3>
-          {pin.content && (
-            hasChecklist ? (
-              <div className="task-pin__checklist">
-                {parsedLines.map((line, i) => {
-                  if (line.type === 'checklist') {
-                    return (
-                      <label key={i} className={`task-pin__item ${line.checked ? 'task-pin__item--checked' : ''}`}>
-                        <input
-                          type="checkbox"
-                          checked={line.checked}
-                          onChange={() => handleItemToggle(i)}
-                          className="task-pin__item-input"
-                        />
-                        <span className="task-pin__item-box" />
-                        <span className="task-pin__item-text">{line.text}</span>
-                      </label>
-                    );
-                  }
-                  if (line.text.trim()) {
-                    return <div key={i} className="task-pin__item-label">{line.text}</div>;
-                  }
-                  return <div key={i} className="task-pin__item-spacer" />;
-                })}
+        <div
+          className="task-pin__text"
+          onDoubleClick={isEditing ? undefined : startEdit}
+          onBlur={isEditing ? handleEditBlur : undefined}
+        >
+          {isEditing ? (
+            <>
+              <input
+                className="task-pin__title-input"
+                value={draftTitle}
+                onChange={(e) => setDraftTitle(e.target.value)}
+                onKeyDown={handleKeyDown}
+                autoFocus
+                aria-label="Edit title"
+              />
+              <textarea
+                className="task-pin__content-input"
+                value={draftContent}
+                onChange={(e) => setDraftContent(e.target.value)}
+                onKeyDown={handleKeyDown}
+                rows={contentRows}
+                placeholder="Task content..."
+                aria-label="Edit content"
+              />
+              <div className="task-pin__edit-actions">
+                <button
+                  className="task-pin__edit-cancel"
+                  onMouseDown={(e) => { e.preventDefault(); cancel(); }}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="task-pin__edit-save"
+                  disabled={!draftTitle.trim()}
+                  onMouseDown={(e) => { e.preventDefault(); save(); }}
+                >
+                  Save
+                </button>
               </div>
-            ) : (
-              <p className="task-pin__description">
-                {pin.content.split('\n').map((line, i) => (
-                  <span key={i}>{line}{'\n'}</span>
-                ))}
-              </p>
-            )
+            </>
+          ) : (
+            <>
+              <h3 className="task-pin__title">{pin.title}</h3>
+              {pin.content && (
+                hasChecklist ? (
+                  <div
+                    className="task-pin__checklist"
+                    onDoubleClick={(e) => e.stopPropagation()}
+                  >
+                    {parsedLines.map((line, i) => {
+                      if (line.type === 'checklist') {
+                        return (
+                          <label key={i} className={`task-pin__item ${line.checked ? 'task-pin__item--checked' : ''}`}>
+                            <input
+                              type="checkbox"
+                              checked={line.checked}
+                              onChange={() => handleItemToggle(i)}
+                              className="task-pin__item-input"
+                            />
+                            <span className="task-pin__item-box" />
+                            <span className="task-pin__item-text">{line.text}</span>
+                          </label>
+                        );
+                      }
+                      if (line.text.trim()) {
+                        return <div key={i} className="task-pin__item-label">{line.text}</div>;
+                      }
+                      return <div key={i} className="task-pin__item-spacer" />;
+                    })}
+                  </div>
+                ) : (
+                  <p className="task-pin__description">{pin.content}</p>
+                )
+              )}
+            </>
           )}
         </div>
       </div>

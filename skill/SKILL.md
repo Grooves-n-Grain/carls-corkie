@@ -51,6 +51,18 @@ curl -X POST "$CORKBOARD_API/api/projects" \
   -d '{"name":"Launch blog","emoji":"✍️","phase":"build","tracks":[{"name":"Write posts","owner":"claude"},{"name":"Review","owner":"you"}]}'
 ```
 
+## Editing Pins
+
+Task and Note pins can be edited inline on the dashboard by double-clicking the title. From the API, use `PATCH /api/pins/:id` to update any field:
+
+```bash
+# Update a pin's title and content
+curl -X PATCH "$CORKBOARD_API/api/pins/<pin-id>" \
+  -H "Authorization: Bearer $CORKBOARD_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Updated title","content":"New content here"}'
+```
+
 ## Pick The Right Surface
 
 - Use a `pin` for one-off tasks, alerts, links, notes, briefings, tracking updates, or short-lived reminders.
