@@ -1,5 +1,8 @@
 # carl's corkie
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node.js 20+](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
+
 A real-time corkboard dashboard built for people whose brains work a little differently. Warm, tactile, ADHD-friendly.
 
 ![carl's corkie](client/public/carls-corkie-alt.png)
@@ -199,6 +202,7 @@ Pins are the core unit. Each type has its own look and behavior:
 | `article` | Article summaries with a built-in reader modal |
 | `twitter` | Twitter/X post previews |
 | `reddit` | Reddit post previews |
+| `youtube` | YouTube video cards with thumbnail previews |
 | `opportunity` | Opportunities flagged from email or other sources |
 
 Pin status: `active` | `completed` | `snoozed` | `dismissed`
@@ -386,6 +390,13 @@ Server tests use an isolated temporary SQLite database, so they do not depend on
 - [ ] Sound/notification options
 - [ ] Pin drag-and-drop reordering
 - [ ] Themes beyond the default cork aesthetic
+
+## Support
+
+If this project helps you get stuff done, consider buying me a coffee:
+
+<!-- TODO: Replace with your Buy Me a Coffee link -->
+<!-- [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-orange?logo=buy-me-a-coffee)](https://buymeacoffee.com/YOUR_USERNAME) -->
 
 ## License
 
