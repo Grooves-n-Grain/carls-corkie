@@ -5,7 +5,7 @@
 # Environment:
 #   CORKBOARD_DIR        - Where to clone/find the dashboard (default: ~/.openclaw/dashboard)
 #   OPENCLAW_WORKSPACE   - OpenClaw workspace path (default: ~/.openclaw/workspace)
-#   CORKBOARD_REPO       - Git repo URL (default: https://github.com/zheroz00/carls-corkie.git)
+#   CORKBOARD_REPO       - Git repo URL (default: https://github.com/Grooves-n-Grain/carls-corkie.git)
 #   CORKBOARD_PORT       - Server port (default: 3010)
 #   CORKBOARD_HOST       - Server bind host (default: 0.0.0.0)
 
@@ -24,7 +24,7 @@ error() { echo -e "${RED}[corkboard]${NC} $*" >&2; }
 # --- Configuration ---
 INSTALL_DIR="${CORKBOARD_DIR:-$HOME/.openclaw/dashboard}"
 WORKSPACE="${OPENCLAW_WORKSPACE:-$HOME/.openclaw/workspace}"
-REPO_URL="${CORKBOARD_REPO:-https://github.com/zheroz00/carls-corkie.git}"
+REPO_URL="${CORKBOARD_REPO:-https://github.com/Grooves-n-Grain/carls-corkie.git}"
 PORT="${CORKBOARD_PORT:-3010}"
 HOST="${CORKBOARD_HOST:-0.0.0.0}"
 SKILL_DIR="$(cd "$(dirname "$0")/.." && pwd)"

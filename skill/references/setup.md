@@ -18,7 +18,7 @@ bash {baseDir}/scripts/install.sh
 
 Manual path:
 ```bash
-git clone https://github.com/zheroz00/carls-corkie.git carls-corkie
+git clone https://github.com/Grooves-n-Grain/carls-corkie.git carls-corkie
 cd carls-corkie
 npm install
 npm run build
@@ -30,7 +30,7 @@ matching `VITE_CORKBOARD_TOKEN` gets baked into the client bundle. You don't nee
 to do anything for the happy path; see the Authentication section in the main
 README for rotation, sharing, and the disable escape hatch.
 
-The installer defaults to `https://github.com/zheroz00/carls-corkie.git`.
+The installer defaults to `https://github.com/Grooves-n-Grain/carls-corkie.git`.
 If you use the installer script against a fork, set `CORKBOARD_REPO` first so it clones the right repository instead.
 
 ## Environment

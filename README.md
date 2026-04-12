@@ -30,7 +30,7 @@ This dashboard flips that on its head. Instead of *you* managing a todo list, yo
 ## Quick start
 
 ```bash
-git clone https://github.com/zheroz00/carls-corkie.git
+git clone https://github.com/Grooves-n-Grain/carls-corkie.git
 cd carls-corkie
 npm install
 npm run dev
@@ -316,7 +316,7 @@ This repo includes a bundled OpenClaw skill in `skill/`.
 For first-time installs, point the installer at this repo:
 
 ```bash
-export CORKBOARD_REPO="https://github.com/zheroz00/carls-corkie.git"
+export CORKBOARD_REPO="https://github.com/Grooves-n-Grain/carls-corkie.git"
 bash skill/scripts/install.sh
 ```
 

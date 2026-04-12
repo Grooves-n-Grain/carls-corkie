@@ -1,7 +1,7 @@
 ---
 name: corkboard_dashboard
 description: Post and manage real-time corkboard pins, lamp cues, deleted-history recovery, and multi-track project pipeline work for the Carl's Corkie dashboard. Use when you need to surface actionable tasks, alerts, opportunities, links, briefings, package tracking, article summaries, YouTube videos, or cellar ideas on the board.
-homepage: https://github.com/zheroz00/carls-corkie
+homepage: https://github.com/Grooves-n-Grain/carls-corkie
 metadata: {"openclaw":{"emoji":"📌"}}
 ---
 
@@ -13,7 +13,7 @@ Use this skill when you need to put something actionable on the board right now.
 
 1. Install or update the dashboard:
 ```bash
-export CORKBOARD_REPO="https://github.com/zheroz00/carls-corkie.git"   # first-time installs only
+export CORKBOARD_REPO="https://github.com/Grooves-n-Grain/carls-corkie.git"   # first-time installs only
 bash {baseDir}/scripts/install.sh
 ```
 

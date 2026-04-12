@@ -17,6 +17,7 @@ graphify-out/
 
 # Claude Code local settings
 .claude/
+CLAUDE.md
 
 # Superpowers local state
 .superpowers/
@@ -49,3 +50,6 @@ tmp/
 .agents/
 .playwright-mcp/
 skills-lock.json
+
+# Remotion demo project (not yet complete)
+carls_corkie_demo/
