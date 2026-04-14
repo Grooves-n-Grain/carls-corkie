@@ -51,5 +51,8 @@ tmp/
 .playwright-mcp/
 skills-lock.json
 
+# Demo seed manifest
+scripts/.demo-manifest.json
+
 # Remotion demo project (not yet complete)
 carls_corkie_demo/
