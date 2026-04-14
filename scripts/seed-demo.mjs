@@ -21,11 +21,14 @@ const ROOT = resolve(__dirname, '..');
 const MANIFEST_PATH = resolve(__dirname, '.demo-manifest.json');
 
 // ─── YouTube Configuration ───────────────────────────────
-// The title says "Woodworking with a CNC" but the video is Rick Astley —
-// the thumbnail gives away the prank. Intentional Rickroll.
-const YOUTUBE_VIDEO_ID = 'dQw4w9WgXcQ';
-const YOUTUBE_CHANNEL  = 'Matthias Wandel';
-const YOUTUBE_DURATION = '3:33';
+// Real Rick Astley metadata — the joke is the unannounced Rickroll hiding
+// in plain sight on the demo board.
+const YOUTUBE_VIDEO_ID    = 'dQw4w9WgXcQ';
+const YOUTUBE_TITLE       = 'Rick Astley - Never Gonna Give You Up (Official Video) (4K Remaster)';
+const YOUTUBE_CHANNEL     = 'Rick Astley';
+const YOUTUBE_DURATION    = '3:34';
+const YOUTUBE_PUBLISHED   = '2009-10-25T06:57:33Z';
+const YOUTUBE_DESCRIPTION = 'The official video for "Never Gonna Give You Up" by Rick Astley. A global smash on release in July 1987, topping charts in 25 countries.';
 
 // ─── Load token from .env ────────────────────────────────
 
@@ -132,14 +135,16 @@ const PINS = [
   },
   {
     type: 'youtube',
-    title: 'Woodworking with a CNC — tips from the shop',
+    title: YOUTUBE_TITLE,
     url: `https://www.youtube.com/watch?v=${YOUTUBE_VIDEO_ID}`,
     youtubeData: {
       videoId: YOUTUBE_VIDEO_ID,
       thumbnailUrl: `https://i.ytimg.com/vi/${YOUTUBE_VIDEO_ID}/hqdefault.jpg`,
       channelTitle: YOUTUBE_CHANNEL,
+      description: YOUTUBE_DESCRIPTION,
       duration: YOUTUBE_DURATION,
-      publishedAt: '2026-03-28T14:00:00Z',
+      publishedAt: YOUTUBE_PUBLISHED,
+      embedUrl: `https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}`,
       sourceUrl: `https://www.youtube.com/watch?v=${YOUTUBE_VIDEO_ID}`,
     },
   },
