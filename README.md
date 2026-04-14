@@ -110,13 +110,29 @@ curl -X POST "$CORKBOARD_API/api/pins" \
 
 ### Rotating the token
 
+The token is stable by default. `scripts/ensure-token.mjs` only *generates* a
+token on first run when `.env` has none — it does not rotate existing tokens.
+The token changes only when you explicitly:
+
+1. Run `npm run token:rotate`
+2. Delete `.env` (or the token line) and restart, triggering fresh generation
+3. Run a release-prep / secret-scrub workflow that clears secrets before publish
+
 ```bash
 npm run token:rotate     # generate a new token in .env
 npm run pm2:restart      # (or restart your dev server)
 npm run build            # rebuild the client so the new token is baked in
 ```
 
-External senders will need the new value too — re-source `.env` or update your
+> **Heads up for external integrations.** When the token rotates, anything
+> hitting the API with a hardcoded token (n8n HTTP nodes, installed OpenClaw
+> skills, Home Assistant automations, browser webhooks) will start returning
+> 401 `Missing or invalid token`. Update those senders with the new value from
+> `.env`. A running PM2 process may briefly keep serving with the *old* token
+> cached in its process env until you restart it — so symptoms sometimes
+> appear delayed, right after `pm2 restart`.
+
+External senders need the new value too — re-source `.env` or update your
 shell env.
 
 ### Showing the current token
