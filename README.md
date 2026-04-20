@@ -11,7 +11,7 @@ A real-time digital corkboard built for your agent.
 
 ## Demo
 
-<video src="https://github.com/Grooves-n-Grain/carls-corkie/releases/download/v0.1.0/demo.mp4" controls playsinline width="100%" style="max-width: 860px"></video>
+<video src="https://github.com/Grooves-n-Grain/carls-corkie/releases/download/v0.1.0/demo.mp4" controls playsinline width="860"></video>
 
 ### Note from the human
 
