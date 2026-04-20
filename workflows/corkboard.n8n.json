@@ -1,0 +1,760 @@
+{
+  "name": "corkboard",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// n8n Code Node: URL Extractor\n// Input: items[0].json contains the webhook payload\n// Output: Extracted and cleaned URL as a standardized output\n\n// Get the incoming webhook data from the first item.\nconst payload = items[0].json;\n\n// --- REVISED LOGIC ---\n\n// 1. First, find the raw text input from the payload.\nlet rawText = null;\nif (payload.body?.URL) {\n  rawText = payload.body.URL;\n} else if (payload.body?.text) {\n  rawText = payload.body.text;\n} else if (payload.body?.message) {\n  rawText = payload.body.message;\n} else {\n  // As a fallback, convert the entire payload to a string to search within it.\n  rawText = JSON.stringify(payload);\n}\n\nlet extractedUrl = null;\n\n// 2. If we have raw text, extract the FIRST URL found in it.\nif (rawText) {\n  const urlPattern = /(https?:\\/\\/[^\\s>]+)/; // Find http/https, followed by non-space/non-> chars\n  const matches = rawText.match(urlPattern);\n  if (matches) {\n    extractedUrl = matches[0];\n  }\n}\n\n// 3. NOW, we clean the URL that we've already extracted.\nif (extractedUrl) {\n  let cleanedUrl = extractedUrl;\n\n  // This logic is now safe because we are ONLY operating on the URL itself.\n  // It will clean up URLs that have trailing punctuation like periods, commas, or closing brackets.\n  cleanedUrl = cleanedUrl.replace(/[.,;!?)>\\]}'\"]+$/, \"\");\n  \n  extractedUrl = cleanedUrl;\n}\n\n// --- END OF REVISED LOGIC ---\n\n// If no URL could be found after searching and cleaning, throw an error.\nif (!extractedUrl) {\n  throw new Error('No URL found in payload');\n}\n\n// Return the final, cleaned URL in the standardized n8n format.\nreturn {\n  json: {\n    URL: extractedUrl\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -672,
+        288
+      ],
+      "id": "14d100f7-a920-4ac7-b5ea-8cd4ca97aa57",
+      "name": "Normalize URL input"
+    },
+    {
+      "parameters": {
+        "jsCode": "const url = $input.first().json.URL.toLowerCase();\n\nlet category;\nif (url.includes('github.com')) {\n  category = 'github';\n} else if (url.includes('reddit.com')) {\n  category = 'reddit';\n} else if (url.includes('x.com') || url.includes('twitter.com')) {\n  category = 'twitter';\n} else if (url.includes('youtube.com') || url.includes('youtu.be')) {\n  category = 'youtube';\n} else {\n  category = 'article';\n}\n\nreturn {\n  json: {\n    URL: $input.first().json.URL,\n    category\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        288
+      ],
+      "id": "21300e7b-b66f-4be1-af09-f02ccaa85d6e",
+      "name": "Classify URL"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cond-github-01",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "github",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "github"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cond-reddit-01",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "reddit",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "reddit"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cond-twitter-01",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "twitter",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "twitter"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cond-article-01",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "article",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "article"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cond-youtube-01",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "youtube",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "youtube"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -224,
+        240
+      ],
+      "id": "0b5bddcb-d1cf-41bc-a462-950060584946",
+      "name": "Route by Category"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "repository",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "={{ $json.URL }}",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "={{ $json.URL }}",
+          "mode": "url"
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0c4cf051-b24c-49f3-a794-3fd6344d606b",
+      "name": "Get a repository",
+      "webhookId": "2c3af5f6-b74e-4cbd-9b16-c7f136684df3",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "wzr45HnJ0ogoxqzk",
+          "name": "GitHub account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5180/api/pins",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $vars.carls_corkie }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "type",
+              "value": "=github"
+            },
+            {
+              "name": "title",
+              "value": "={{ $json.name }}"
+            },
+            {
+              "name": "content",
+              "value": "={{ $json.description }}"
+            },
+            {
+              "name": "repo",
+              "value": "={{ $json.full_name }}"
+            },
+            {
+              "name": "url",
+              "value": "={{ $json.html_url }}"
+            },
+            {
+              "name": "stars",
+              "value": "={{ $json.stargazers_count }}"
+            },
+            {
+              "name": "forks",
+              "value": "={{ $json.forks }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "c506761f-7b66-45fb-941e-f5d6bfd72178",
+      "name": "Post github note to corkboard"
+    },
+    {
+      "parameters": {
+        "jsCode": "const url = $input.first().json.URL;\n\n// Extract subreddit name from URL\nconst match = url.match(/reddit\\.com\\/r\\/([^\\/]+)/);\nconst subreddit = match ? match[1] : 'unknown';\n\n// Build JSON API URL: normalize to www.reddit.com and append .json\nlet jsonUrl = url.replace('old.reddit.com', 'www.reddit.com');\nif (!jsonUrl.endsWith('/')) jsonUrl += '/';\njsonUrl += '.json';\n\nreturn {\n  json: {\n    URL: url,\n    subreddit: subreddit,\n    jsonUrl: jsonUrl\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        192
+      ],
+      "id": "b78fe173-6128-424e-81f4-262bb0c1a0c1",
+      "name": "Parse Reddit URL"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.jsonUrl }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "n8n-corkboard/1.0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        224,
+        192
+      ],
+      "id": "543d99c4-3f61-4e26-beed-2a415cdce2fc",
+      "name": "Fetch Reddit Post"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nlet postData = {};\ntry {\n  if (Array.isArray(data)) {\n    postData = data[0].data.children[0].data;\n  } else if (data.data && data.data.children) {\n    postData = data.data.children[0].data;\n  }\n} catch (e) {}\n\nconst title = postData.title || '';\nlet selftext = postData.selftext || '';\nconst originalUrl = $('Parse Reddit URL').item.json.URL;\n\n// Truncate selftext to ~400 chars for card preview\nif (selftext.length > 400) {\n  selftext = selftext.substring(0, 400).replace(/\\\\s+\\\\S*$/, '') + '...';\n}\n\nreturn {\n  json: {\n    title: title,\n    content: selftext,\n    url: originalUrl\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        192
+      ],
+      "id": "b7d80ac3-ec00-4d90-928d-f4d8f5d45914",
+      "name": "Parse Reddit Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5180/api/pins",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $vars.carls_corkie }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: \"reddit\", title: $json.title, content: $json.content, url: $json.url, priority: 1 }) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        672,
+        192
+      ],
+      "id": "1b950e09-e625-41ee-83ed-ab6c5d6c74ab",
+      "name": "Post reddit note to corkboard"
+    },
+    {
+      "parameters": {
+        "url": "https://publish.twitter.com/oembed",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $json.URL }}"
+            },
+            {
+              "name": "omit_script",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        384
+      ],
+      "id": "4371c310-d447-4deb-99f9-25efcec9a220",
+      "name": "Fetch Tweet"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\nconst html = data.html || '';\n\nconst pMatch = html.match(/<p[^>]*>([\\s\\S]*?)<\\/p>/);\nlet tweetText = pMatch ? pMatch[1] : '';\n\ntweetText = tweetText\n  .replace(/<a[^>]*>(.*?)<\\/a>/g, '$1')\n  .replace(/<br\\s*\\/?>/g, '\\n')\n  .replace(/<[^>]+>/g, '')\n  .replace(/&mdash;/g, '\\u2014')\n  .replace(/&amp;/g, '&')\n  .replace(/&lt;/g, '<')\n  .replace(/&gt;/g, '>')\n  .replace(/&quot;/g, '\"')\n  .replace(/&#39;/g, \"'\")\n  .trim();\n\nreturn {\n  json: {\n    author: data.author_name || 'Unknown',\n    text: tweetText || 'No text available',\n    url: data.url || ''\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        384
+      ],
+      "id": "6383b24f-c497-41bb-b0d8-5020c2c7f1e7",
+      "name": "Parse Tweet Data"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5180/api/pins",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $vars.carls_corkie }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: \"twitter\", title: $json.author, content: $json.text, url: $json.url, priority: 1 }) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        448,
+        384
+      ],
+      "id": "4b5074ba-85a8-40b4-b73b-6066e375ce2a",
+      "name": "Post tweet note to corkboard"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.URL }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (compatible; n8n-corkboard/1.0)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        0,
+        576
+      ],
+      "id": "d50ea177-d6d9-4090-8a82-aac3938e5bba",
+      "name": "Fetch Article Page"
+    },
+    {
+      "parameters": {
+        "jsCode": "const html = $input.first().json.data || '';\nconst originalUrl = $('Classify URL').item.json.URL;\n\n// Extract domain\nlet source = 'Unknown';\ntry {\n  source = new URL(originalUrl).hostname.replace('www.', '');\n} catch (e) {}\n\n// Extract title from og:title or <title>\nlet title = '';\nconst ogTitleMatch = html.match(/<meta[^>]*property=[\"']og:title[\"'][^>]*content=[\"']([^\"']*)[\"']/) \n  || html.match(/<meta[^>]*content=[\"']([^\"']*)[\"'][^>]*property=[\"']og:title[\"']/);\nif (ogTitleMatch) {\n  title = ogTitleMatch[1];\n} else {\n  const titleMatch = html.match(/<title[^>]*>([^<]+)<\\/title>/i);\n  if (titleMatch) title = titleMatch[1].trim();\n}\n\n// Extract description for TLDR\nlet tldr = '';\nconst descMatch = html.match(/<meta[^>]*property=[\"']og:description[\"'][^>]*content=[\"']([^\"']*)[\"']/)\n  || html.match(/<meta[^>]*content=[\"']([^\"']*)[\"'][^>]*property=[\"']og:description[\"']/)\n  || html.match(/<meta[^>]*name=[\"']description[\"'][^>]*content=[\"']([^\"']*)[\"']/)\n  || html.match(/<meta[^>]*content=[\"']([^\"']*)[\"'][^>]*name=[\"']description[\"']/);\nif (descMatch) {\n  tldr = descMatch[1];\n}\n\n// Extract tags from article:tag or keywords\nconst tags = [];\nconst tagRegex = /<meta[^>]*property=[\"']article:tag[\"'][^>]*content=[\"']([^\"']*)[\"']/g;\nlet tagMatch;\nwhile ((tagMatch = tagRegex.exec(html)) !== null) {\n  tags.push(tagMatch[1]);\n}\nif (tags.length === 0) {\n  const kwMatch = html.match(/<meta[^>]*name=[\"']keywords[\"'][^>]*content=[\"']([^\"']*)[\"']/);\n  if (kwMatch) {\n    kwMatch[1].split(',').slice(0, 5).forEach(t => tags.push(t.trim()));\n  }\n}\n\n// Estimate read time from body text length\nconst textOnly = html.replace(/<script[^>]*>[\\s\\S]*?<\\/script>/gi, '').replace(/<style[^>]*>[\\s\\S]*?<\\/style>/gi, '').replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ');\nconst wordCount = textOnly.split(' ').filter(w => w.length > 0).length;\nconst minutes = Math.max(1, Math.round(wordCount / 200));\nconst readTime = minutes + ' min';\n\n// Use webhook title if available, fall back to extracted\nlet webhookTitle = '';\ntry { webhookTitle = $('Webhook').item.json.body?.title || ''; } catch(e) {}\nconst finalTitle = webhookTitle || title || 'Untitled Article';\n\nreturn {\n  json: {\n    title: finalTitle,\n    url: originalUrl,\n    source: source,\n    tldr: tldr || 'No summary available.',\n    bullets: [],\n    tags: tags.slice(0, 5),\n    readTime: readTime\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        576
+      ],
+      "id": "1351b068-89d7-428e-916a-00d235bd563a",
+      "name": "Parse Article Metadata"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "corkboard",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -896,
+        288
+      ],
+      "id": "0fc6d57c-81ab-42f4-b192-f8a3d718d26f",
+      "name": "Webhook",
+      "webhookId": "2caa1236-7e41-4cb8-ba78-ec0c1957f6c1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "W5h3kVLkDGM7afRM",
+          "name": "corkie-auth"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5180/api/pins",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $vars.carls_corkie }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ type: \"article\", title: $json.title, url: $json.url, priority: 1, articleData: { url: $json.url, source: $json.url, tldr: $json.tldr, bullets: $json.bullets || [], tags: $json.tags || [], readTime: $json.readTime || \"\" } }) }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        576
+      ],
+      "id": "ca038579-d80e-4539-8957-14ada3920c20",
+      "name": "Post Article to Corkboard1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const url = $input.first().json.URL;\n\n// Extract video ID from various YouTube URL formats\nlet videoId = null;\nconst patterns = [\n  /[?&]v=([a-zA-Z0-9_-]{11})/,\n  /youtu\\.be\\/([a-zA-Z0-9_-]{11})/,\n  /\\/shorts\\/([a-zA-Z0-9_-]{11})/,\n  /\\/live\\/([a-zA-Z0-9_-]{11})/,\n  /\\/embed\\/([a-zA-Z0-9_-]{11})/\n];\n\nfor (const pattern of patterns) {\n  const match = url.match(pattern);\n  if (match) { videoId = match[1]; break; }\n}\n\nif (!videoId) {\n  throw new Error('Could not extract YouTube video ID from: ' + url);\n}\n\nconst canonicalUrl = 'https://www.youtube.com/watch?v=' + videoId;\nconst embedUrl = 'https://www.youtube.com/embed/' + videoId;\nconst thumbnailUrl = 'https://i.ytimg.com/vi/' + videoId + '/hqdefault.jpg';\n\n// Fetch metadata via oEmbed\nlet title = 'YouTube Video';\nlet channelTitle = '';\nlet oembedThumb = '';\n\ntry {\n  const resp = await fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent(canonicalUrl) + '&format=json');\n  if (resp.ok) {\n    const data = await resp.json();\n    title = data.title || title;\n    channelTitle = data.author_name || '';\n    oembedThumb = data.thumbnail_url || '';\n  }\n} catch (e) {\n  // oEmbed failed, use defaults\n}\n\nreturn {\n  json: {\n    title,\n    url: canonicalUrl,\n    youtubeData: {\n      videoId,\n      thumbnailUrl: oembedThumb || thumbnailUrl,\n      channelTitle: channelTitle || undefined,\n      embedUrl,\n      sourceUrl: canonicalUrl\n    }\n  }\n};"
+      },
+      "id": "yt-oembed-001",
+      "name": "Fetch YouTube oEmbed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:5180/api/pins",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ $vars.carls_corkie }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n  type: 'youtube',\n  title: $json.snippet.title,\n  url: `https://www.youtube.com/watch?v=${$json.id}`,\n  youtubeData: {\n    videoId: $json.id,\n    thumbnailUrl: $json.snippet.thumbnails.high.url,\n    channelTitle: $json.snippet.channelTitle,\n    description: $json.snippet.description,\n    publishedAt: $json.snippet.publishedAt,\n    duration: (() => {\n      const m = $json.contentDetails.duration.match(/^PT(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+)S)?$/);\n      const h = parseInt(m?.[1] || '0', 10);\n      const mi = parseInt(m?.[2] || '0', 10);\n      const s = parseInt(m?.[3] || '0', 10);\n      return h > 0\n        ? `${h}:${String(mi).padStart(2,'0')}:${String(s).padStart(2,'0')}`\n        : `${mi}:${String(s).padStart(2,'0')}`;\n    })(),\n    embedUrl: `https://www.youtube.com/embed/${$json.id}`,\n    sourceUrl: `https://www.youtube.com/watch?v=${$json.id}`\n  }\n}) }}\n",
+        "options": {}
+      },
+      "id": "yt-post-001",
+      "name": "Post YouTube to Corkboard",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        448,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "get",
+        "videoId": "={{ $json.youtubeData.videoId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        224,
+        768
+      ],
+      "id": "67018dcf-93cf-40b0-b3d6-e9f2783b5c17",
+      "name": "Get a video",
+      "alwaysOutputData": true,
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "jLK9HoNsJ2aF2jwu",
+          "name": "YouTube account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Normalize URL input": {
+      "main": [
+        [
+          {
+            "node": "Classify URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify URL": {
+      "main": [
+        [
+          {
+            "node": "Route by Category",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Category": {
+      "main": [
+        [
+          {
+            "node": "Get a repository",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Parse Reddit URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Tweet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Article Page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch YouTube oEmbed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a repository": {
+      "main": [
+        [
+          {
+            "node": "Post github note to corkboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Reddit URL": {
+      "main": [
+        [
+          {
+            "node": "Fetch Reddit Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Reddit Post": {
+      "main": [
+        [
+          {
+            "node": "Parse Reddit Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Reddit Data": {
+      "main": [
+        [
+          {
+            "node": "Post reddit note to corkboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Tweet": {
+      "main": [
+        [
+          {
+            "node": "Parse Tweet Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Tweet Data": {
+      "main": [
+        [
+          {
+            "node": "Post tweet note to corkboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Article Page": {
+      "main": [
+        [
+          {
+            "node": "Parse Article Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Article Metadata": {
+      "main": [
+        [
+          {
+            "node": "Post Article to Corkboard1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize URL input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch YouTube oEmbed": {
+      "main": [
+        [
+          {
+            "node": "Get a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a video": {
+      "main": [
+        [
+          {
+            "node": "Post YouTube to Corkboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "f59271cf-2164-4532-8b6a-57108020ab5f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  },
+  "id": "OUXMaQRdhm3k7w0c",
+  "tags": []
+}
