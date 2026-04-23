@@ -1,6 +1,6 @@
 # carl's corkie
 
-> ### *Put another pin on the corkieNo transcription result.*
+> ### *Put another pin on the corkie!*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node.js 20+](https://img.shields.io/badge/Node.js-20+-green.svg)](https://nodejs.org)
